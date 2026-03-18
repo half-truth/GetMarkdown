@@ -22,14 +22,14 @@ English | [简体中文](README.md)
 | | Other Clippers | MarkDownload |
 |:---:|:---:|:---:|
 | **Permissions** | All sites / broad host access | `activeTab` only — access on click |
-| **Chinese Sites** | Broken images, ads, encoding issues | 68 sites deeply adapted |
+| **Chinese Sites** | Broken images, ads, encoding issues | 62 sites deeply adapted |
 | **Obsidian** | Manual frontmatter | Auto-generated frontmatter |
 | **Privacy** | May upload data | Fully local, zero network requests |
 
 ## Features
 
 - **One-Click Clip** — Click the icon to extract, convert, and download as Markdown
-- **68 Site Adapters** — WeChat, Zhihu, CSDN, Juejin, QQ News, Reddit, and more
+- **62 Site Adapters** — WeChat, Zhihu, CSDN, Juejin, QQ News, Reddit, and more
 - **Obsidian Frontmatter** — Auto-generates `title` / `id` / `created` / `tags` / `source`
 - **Smart Image Handling** — 13 lazy-load attributes detected, relative URLs auto-resolved
 - **Live Preview** — Preview full Markdown before downloading, edit title inline
@@ -79,21 +79,66 @@ site: example.com
 ---
 ```
 
-## Supported Sites
+## Supported Sites (62)
 
-<details>
-<summary><b>View all 68 adapted sites</b></summary>
+### Chinese Content Platforms
 
-| Category | Sites |
-|:---------|:------|
-| **Chinese Communities** | WeChat Official Accounts, Zhihu, CSDN, Juejin, cnblogs, SegmentFault, Jianshu, sspai |
-| **News** | QQ News, The Paper, iFeng, NetEase News, Baidu Baike |
-| **Tech Blogs** | Medium, Dev.to, Hacker News, InfoQ |
-| **Doc Frameworks** | GitBook, Docusaurus, VuePress, MkDocs, Read the Docs |
-| **Social** | Reddit (including Shadow DOM), TikTok Shop |
-| **Others** | Chinese Wikipedia, and more... |
+| Site | Domain | Adapter Features |
+|:-----|:-------|:-----------------|
+| WeChat Official Accounts | `mp.weixin.qq.com` | Fix `data-src` lazy images, remove QR codes |
+| Zhihu | `zhihu.com` | Remove recommendations, login prompts |
+| CSDN | `csdn.net` | Remove login overlay, ads |
+| Juejin | `juejin.cn` | Clean sidebar and recommendations |
+| cnblogs | `cnblogs.com` | Clean navigation and ads |
+| Jianshu | `jianshu.com` | Remove follow prompts |
+| SegmentFault | `segmentfault.com` | Clean sidebar |
+| sspai | `sspai.com` | Clean membership prompts |
+| Yuque | `yuque.com` | Handle Yuque doc structure |
+| OSChina | `oschina.net` | Clean recommendations |
+| 51CTO | `51cto.com` | Clean ads |
+| V2EX | `v2ex.com` | Clean node navigation |
+| Feishu Docs | `feishu.cn` | Handle Feishu structure |
 
-</details>
+### Chinese News
+
+| Site | Domain |
+|:-----|:-------|
+| QQ News | `news.qq.com` |
+| The Paper | `thepaper.cn` |
+| iFeng | `ifeng.com` |
+| NetEase | `163.com` |
+| Sina / Weibo | `sina.com.cn` / `weibo.com` |
+| Sohu | `sohu.com` |
+| 36Kr | `36kr.com` |
+| Huxiu | `huxiu.com` |
+| TMTPost | `tmtpost.com` |
+| iFanr | `ifanr.com` |
+| Toutiao | `toutiao.com` |
+| Baijiahao | `baijiahao.baidu.com` |
+| Douban | `douban.com` |
+| MSN | `msn.cn` / `msn.com` |
+
+### International News & Tech
+
+BBC, CNN, The Verge, TechCrunch, Ars Technica, Wired, The Guardian, New York Times, Washington Post, Reuters, Bloomberg, Forbes
+
+### Tech Blogs & Communities
+
+Medium, DEV Community, Hacker News, Stack Overflow, GitHub, GitLab, Hashnode, freeCodeCamp, CSS-Tricks, Smashing Magazine, DigitalOcean, LogRocket Blog, InfoQ CN, LeetCode CN
+
+### Cloud Developer Communities
+
+Alibaba Cloud Developer (`developer.aliyun.com`), Tencent Cloud Developer (`cloud.tencent.com/developer`)
+
+### Doc Frameworks (Auto-detected)
+
+GitBook, Docusaurus, VuePress/VitePress, MkDocs, Read the Docs
+
+### Other Popular Sites
+
+Wikipedia, MDN Web Docs, W3Schools, Quora, Substack, Notion, Reddit (Shadow DOM support), TikTok Shop
+
+> **Site not listed?** The extension still works as a general-purpose clipper. [Open an issue](https://github.com/yuevthins/markdownload-zh/issues) to request a new adapter.
 
 ## Architecture
 

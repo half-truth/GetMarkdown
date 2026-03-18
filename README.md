@@ -22,14 +22,14 @@
 | | 其他剪藏工具 | MarkDownload 中文版 |
 |:---:|:---:|:---:|
 | **权限** | 全站权限 / 读取所有网站 | 仅 `activeTab` — 点击时才访问当前页 |
-| **中文站点** | 图片丢失、乱码、广告残留 | 68 个站点深度适配 |
+| **中文站点** | 图片丢失、乱码、广告残留 | 62 个站点深度适配 |
 | **Obsidian** | 需要手动加 Frontmatter | 自动生成完整 Frontmatter |
 | **隐私** | 可能上传数据 | 完全本地处理，零网络请求 |
 
 ## 核心特性
 
 - **一键剪藏** — 点击图标，自动提取正文、生成 Markdown、下载到本地
-- **68 个站点适配** — 微信公众号 / 知乎 / CSDN / 掘金 / 腾讯新闻 / Reddit 等
+- **62 个站点适配** — 微信公众号 / 知乎 / CSDN / 掘金 / 腾讯新闻 / Reddit 等
 - **Obsidian Frontmatter** — 自动生成 `title` / `id` / `created` / `tags` / `source` 元数据
 - **智能图片处理** — 13 种懒加载属性自动识别，相对路径自动转绝对路径
 - **实时预览** — 下载前预览完整 Markdown 内容，支持编辑标题
@@ -79,21 +79,112 @@ site: example.com
 ---
 ```
 
-## 适配站点
+## 适配站点（62 个）
 
-<details>
-<summary><b>查看全部 68 个适配站点</b></summary>
+### 中文内容平台
 
-| 分类 | 站点 |
+| 站点 | 域名 | 适配能力 |
+|:-----|:-----|:---------|
+| 微信公众号 | `mp.weixin.qq.com` | 修复 `data-src` 懒加载图片、移除二维码和推广 |
+| 知乎 | `zhihu.com` | 移除推荐栏、热门问答、登录弹窗 |
+| CSDN | `csdn.net` | 移除登录遮罩、推荐文章、广告 |
+| 掘金 | `juejin.cn` | 清理推荐和侧边栏 |
+| 博客园 | `cnblogs.com` | 清理博客园导航和广告 |
+| 简书 | `jianshu.com` | 移除关注提示和推荐 |
+| 思否 | `segmentfault.com` | 清理侧边栏和广告 |
+| 少数派 | `sspai.com` | 清理会员和推荐内容 |
+| 语雀 | `yuque.com` | 处理语雀特有的文档结构 |
+| 开源中国 | `oschina.net` | 清理社区推荐 |
+| 51CTO | `51cto.com` | 清理广告和侧边栏 |
+| V2EX | `v2ex.com` | 清理节点导航 |
+| 飞书文档 | `feishu.cn` | 处理飞书文档结构 |
+
+### 中文新闻媒体
+
+| 站点 | 域名 | 适配能力 |
+|:-----|:-----|:---------|
+| 腾讯新闻 | `news.qq.com` | 移除视频播放器 UI、AI 助手、广告 |
+| 澎湃新闻 | `thepaper.cn` | 清理互动区和推荐 |
+| 凤凰网 | `ifeng.com` | 清理广告和推荐流 |
+| 网易 | `163.com` | 清理网易新闻推荐和广告 |
+| 新浪/微博 | `sina.com.cn` / `weibo.com` | 清理微博卡片和推荐 |
+| 搜狐 | `sohu.com` | 清理推荐和广告 |
+| 36氪 | `36kr.com` | 清理会员和推荐 |
+| 虎嗅 | `huxiu.com` | 清理推荐文章 |
+| 钛媒体 | `tmtpost.com` | 清理广告 |
+| 爱范儿 | `ifanr.com` | 清理推荐 |
+| 今日头条 | `toutiao.com` | 清理推荐流 |
+| 百度百家号 | `baijiahao.baidu.com` | 清理百度广告 |
+| 豆瓣 | `douban.com` | 清理推荐和广告 |
+| MSN | `msn.cn` / `msn.com` | 清理广告和推荐 |
+
+### 国际新闻与科技
+
+| 站点 | 域名 |
 |:-----|:-----|
-| **中文社区** | 微信公众号、知乎、CSDN、掘金、博客园、思否、简书、少数派 |
-| **新闻媒体** | 腾讯新闻、澎湃新闻、凤凰网、网易新闻、百度百科 |
-| **技术博客** | Medium、Dev.to、Hacker News、InfoQ |
-| **文档框架** | GitBook、Docusaurus、VuePress、MkDocs、Read the Docs |
-| **社交平台** | Reddit（含 Shadow DOM）、TikTok Shop |
-| **其他** | 维基百科中文、及更多通用站点… |
+| BBC | `bbc.com` / `bbc.co.uk` |
+| CNN | `cnn.com` |
+| The Verge | `theverge.com` |
+| TechCrunch | `techcrunch.com` |
+| Ars Technica | `arstechnica.com` |
+| Wired | `wired.com` |
+| The Guardian | `theguardian.com` |
+| New York Times | `nytimes.com` |
+| Washington Post | `washingtonpost.com` |
+| Reuters | `reuters.com` |
+| Bloomberg | `bloomberg.com` |
+| Forbes | `forbes.com` |
 
-</details>
+### 技术博客与社区
+
+| 站点 | 域名 |
+|:-----|:-----|
+| Medium | `medium.com` |
+| DEV Community | `dev.to` |
+| Hacker News | `news.ycombinator.com` |
+| Stack Overflow | `stackoverflow.com` |
+| GitHub | `github.com` |
+| GitLab | `gitlab.com` |
+| Hashnode | `hashnode.dev` |
+| freeCodeCamp | `freecodecamp.org` |
+| CSS-Tricks | `css-tricks.com` |
+| Smashing Magazine | `smashingmagazine.com` |
+| DigitalOcean | `digitalocean.com/community` |
+| LogRocket Blog | `blog.logrocket.com` |
+| InfoQ 中文 | `infoq.cn` |
+| LeetCode 中文 | `leetcode.cn` |
+
+### 云厂商开发者社区
+
+| 站点 | 域名 |
+|:-----|:-----|
+| 阿里云开发者 | `developer.aliyun.com` |
+| 腾讯云开发者 | `cloud.tencent.com/developer` |
+
+### 文档框架（自动检测）
+
+| 框架 | 检测方式 |
+|:-----|:---------|
+| GitBook | URL (`gitbook.io`) + DOM 特征 |
+| Docusaurus | DOM 特征检测 |
+| VuePress / VitePress | DOM 特征检测 |
+| MkDocs | DOM 特征检测 |
+| Read the Docs | URL (`readthedocs.io`) |
+
+### 其他常用站点
+
+| 站点 | 域名 |
+|:-----|:-----|
+| Wikipedia | `wikipedia.org` |
+| MDN Web Docs | `developer.mozilla.org` |
+| W3Schools | `w3schools.com` |
+| Quora | `quora.com` |
+| Substack | `substack.com` |
+| Notion | `notion.site` / `notion.so` |
+| Reddit | `reddit.com`（支持 Shadow DOM） |
+| TikTok Shop | `seller.tiktokshopglobalselling.com` |
+
+> **未适配的站点？** 扩展仍可通用提取，只是没有针对性优化。欢迎 [提 Issue](https://github.com/yuevthins/markdownload-zh/issues) 请求适配新站点。
 
 ## 架构
 
