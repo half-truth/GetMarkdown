@@ -243,9 +243,52 @@ npm run build            # 生产构建
 | [Vitest](https://vitest.dev/) | 单元测试 |
 | [Playwright](https://playwright.dev/) | E2E 测试 |
 
+## 参与贡献
+
+欢迎提交 PR！
+
+<details>
+<summary><b>贡献指南</b></summary>
+
+1. **Fork 仓库**
+2. **克隆到本地**
+   ```bash
+   git clone https://github.com/<your-username>/markdownload-zh.git
+   ```
+3. **创建分支**
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+4. **开发并测试**
+   ```bash
+   cd markdownload-zh
+   npm install && npm test
+   ```
+5. **提交**
+   ```bash
+   git commit -m "feat: 添加 XX 站点适配器"
+   ```
+6. **推送并创建 PR**
+   ```bash
+   git push origin feature/your-feature
+   ```
+
+</details>
+
+<a href="https://github.com/yuevthins/markdownload-zh/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yuevthins/markdownload-zh" />
+</a>
+
 ## 许可
 
 [MIT](LICENSE)
+
+## 致谢
+
+- [Readability.js](https://github.com/mozilla/readability) — Mozilla 正文提取引擎
+- [Turndown](https://github.com/mixmark-io/turndown) — HTML 转 Markdown
+- [WXT](https://wxt.dev/) — 浏览器扩展开发框架
+- [MarkDownload](https://github.com/deathau/markdownload) — 原版灵感来源
 
 ---
 

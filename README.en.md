@@ -197,9 +197,52 @@ npm run build            # Production build
 | [Vitest](https://vitest.dev/) | Unit testing |
 | [Playwright](https://playwright.dev/) | E2E testing |
 
+## Contributing
+
+PRs welcome!
+
+<details>
+<summary><b>Contributing Guide</b></summary>
+
+1. **Fork the repo**
+2. **Clone locally**
+   ```bash
+   git clone https://github.com/<your-username>/markdownload-zh.git
+   ```
+3. **Create a branch**
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+4. **Develop and test**
+   ```bash
+   cd markdownload-zh
+   npm install && npm test
+   ```
+5. **Commit**
+   ```bash
+   git commit -m "feat: add XX site adapter"
+   ```
+6. **Push and create a PR**
+   ```bash
+   git push origin feature/your-feature
+   ```
+
+</details>
+
+<a href="https://github.com/yuevthins/markdownload-zh/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yuevthins/markdownload-zh" />
+</a>
+
 ## License
 
 [MIT](LICENSE)
+
+## Acknowledgments
+
+- [Readability.js](https://github.com/mozilla/readability) — Mozilla's content extraction engine
+- [Turndown](https://github.com/mixmark-io/turndown) — HTML to Markdown converter
+- [WXT](https://wxt.dev/) — Browser extension development framework
+- [MarkDownload](https://github.com/deathau/markdownload) — Original inspiration
 
 ---
 
