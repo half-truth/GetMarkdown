@@ -116,7 +116,16 @@ export function getTurndownService(): TurndownService {
       const langMatch = classAttr.match(/(?:language-|lang-)(\S+)/);
       const lang = langMatch ? langMatch[1] : '';
       const text = code.textContent || '';
-      return `\n\n\`\`\`${lang}\n${text.replace(/\n$/, '')}\n\`\`\`\n\n`;
+      // 动态扩展 fence 长度，避免代码中含 ``` 时产生碰撞
+      let fence = '```';
+      const fenceRegex = /(`{3,})/g;
+      let match;
+      while ((match = fenceRegex.exec(text)) !== null) {
+        if (match[1].length >= fence.length) {
+          fence = '`'.repeat(match[1].length + 1);
+        }
+      }
+      return `\n\n${fence}${lang}\n${text.replace(/\n$/, '')}\n${fence}\n\n`;
     },
   });
 

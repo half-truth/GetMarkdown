@@ -25,9 +25,8 @@ export const zhihuAdapter: SiteAdapter = {
       if (!tex) return;
       // 块级公式（独占一行的 span 或 p 内）vs 行内公式
       const isBlock =
-        el.tagName === 'P' ||
-        el.parentElement?.tagName === 'P' &&
-          el.parentElement.children.length === 1;
+        (el.parentElement?.tagName === 'P' &&
+          el.parentElement.children.length === 1);
       const replacement = doc.createTextNode(
         isBlock ? `$$\n${tex}\n$$` : `$${tex}$`
       );

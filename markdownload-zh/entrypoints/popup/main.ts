@@ -5,6 +5,15 @@ import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
 
 const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
 
+const RESTRICTED_PROTOCOLS = [
+  'chrome://',
+  'chrome-extension://',
+  'edge://',
+  'brave://',
+  'about:',
+  'file://',
+];
+
 // DOM 元素
 const loadingEl = document.getElementById('loading')!;
 const mainEl = document.getElementById('main')!;
@@ -40,15 +49,7 @@ async function init() {
     }
 
     // 检查是否为 chrome:// 或其他受限页面
-    const restrictedProtocols = [
-      'chrome://',
-      'chrome-extension://',
-      'edge://',
-      'brave://',
-      'about:',
-      'file://',
-    ];
-    if (restrictedProtocols.some((p) => tab.url!.startsWith(p))) {
+    if (RESTRICTED_PROTOCOLS.some((p) => tab.url!.startsWith(p))) {
       throw new Error('无法在此页面使用扩展');
     }
 
