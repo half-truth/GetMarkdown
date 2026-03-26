@@ -3,7 +3,7 @@
  *
  * 从 extractor.unlisted.ts preprocessLazyImages() 原样迁移
  */
-import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc } from '@/utils/lazy-image';
+import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc, extractFirstFromSrcset } from '@/utils/lazy-image';
 
 /**
  * 预计算懒加载属性选择器（性能优化：避免运行时构建）
@@ -39,7 +39,7 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     // 处理 srcset（如果上面没找到有效 URL）
     const srcset = img.getAttribute('data-srcset') || img.getAttribute('srcset');
     if (srcset && isPlaceholderSrc(img.getAttribute('src'))) {
-      const firstUrl = srcset.split(',')[0]?.trim().split(' ')[0];
+      const firstUrl = extractFirstFromSrcset(srcset);
       const normalizedUrl = normalizeImageUrl(firstUrl || '', baseUrl);
       if (normalizedUrl) {
         img.setAttribute('src', normalizedUrl);
@@ -68,7 +68,7 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     for (const source of sources) {
       const srcset = source.getAttribute('srcset') || source.getAttribute('data-srcset');
       if (srcset) {
-        const firstUrl = srcset.split(',')[0]?.trim().split(' ')[0];
+        const firstUrl = extractFirstFromSrcset(srcset);
         if (firstUrl && !img.getAttribute('src')) {
           img.setAttribute('src', firstUrl);
           break;

@@ -50,17 +50,6 @@ export function registerAdapters(adapters: SiteAdapter[]): void {
 }
 
 /**
- * 从 hostname 中提取主域名
- */
-function getMainDomain(hostname: string): string {
-  const parts = hostname.split('.');
-  if (parts.length >= 2) {
-    return parts.slice(-2).join('.');
-  }
-  return hostname;
-}
-
-/**
  * 获取匹配的站点适配器
  *
  * 匹配优先级：

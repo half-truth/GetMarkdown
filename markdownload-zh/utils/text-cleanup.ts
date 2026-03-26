@@ -7,9 +7,13 @@
  * - U+200B: Zero Width Space
  * - U+200C: Zero Width Non-Joiner
  * - U+200D: Zero Width Joiner
+ * - U+200E: Left-to-Right Mark
+ * - U+200F: Right-to-Left Mark
+ * - U+2060: Word Joiner
  * - U+FEFF: BOM / Zero Width No-Break Space
  */
-const ZERO_WIDTH_CHARS = /[\u200B\u200C\u200D\uFEFF]/g;
+// eslint-disable-next-line no-misleading-character-class
+const ZERO_WIDTH_CHARS = /[\u200B\u200C\u200D\u200E\u200F\u2060\uFEFF]/g;
 
 /**
  * 移除零宽字符

@@ -61,16 +61,7 @@ export async function preprocessDOM(
     console.warn('[Markdownload] normalizeTables failed:', e);
   }
 
-  // 4. 站点特定的 removeSelectors
-  if (adapter?.removeSelectors && adapter.removeSelectors.length > 0) {
-    try {
-      doc.querySelectorAll(adapter.removeSelectors.join(', ')).forEach((el) => el.remove());
-    } catch (e) {
-      console.warn('[Markdownload] removeSelectors failed:', e);
-    }
-  }
-
-  // 5. 站点特定的 preprocess 钩子
+  // 4. 站点特定的 preprocess 钩子
   if (adapter?.preprocess) {
     try {
       await adapter.preprocess(doc, url);
@@ -79,20 +70,31 @@ export async function preprocessDOM(
     }
   }
 
-  // 6. 通用清理
+  // 5. 合并清理：站点 removeSelectors + 通用 UNIVERSAL_REMOVE_SELECTORS（一次 querySelectorAll）
   try {
-    const mainContent = doc.querySelector('article, main, [role="main"], .article-content, .post-content');
-    doc.querySelectorAll(UNIVERSAL_REMOVE_SELECTORS.join(', ')).forEach((el) => {
-      // 如果元素在正文区域内，不要删除
-      if (mainContent && mainContent.contains(el)) {
-        if (el.tagName === 'IFRAME' && (el as HTMLIFrameElement).src?.includes('ads')) {
+    const adapterSelectors = adapter?.removeSelectors || [];
+    const allSelectors = [...adapterSelectors, ...UNIVERSAL_REMOVE_SELECTORS];
+    if (allSelectors.length > 0) {
+      const mainContent = doc.querySelector('article, main, [role="main"], .article-content, .post-content');
+      const adapterSelectorStr = adapterSelectors.length > 0 ? adapterSelectors.join(', ') : '';
+
+      doc.querySelectorAll(allSelectors.join(', ')).forEach((el) => {
+        // 站点特定选择器：无条件移除
+        if (adapterSelectorStr && el.matches(adapterSelectorStr)) {
+          el.remove();
+          return;
+        }
+        // 通用选择器：正文区域内不删除（广告 iframe 除外）
+        if (mainContent && mainContent.contains(el)) {
+          if (el.tagName === 'IFRAME' && (el as HTMLIFrameElement).src?.includes('ads')) {
+            el.remove();
+          }
+        } else {
           el.remove();
         }
-      } else {
-        el.remove();
-      }
-    });
+      });
+    }
   } catch (e) {
-    console.warn('[Markdownload] universal cleanup failed:', e);
+    console.warn('[Markdownload] cleanup failed:', e);
   }
 }

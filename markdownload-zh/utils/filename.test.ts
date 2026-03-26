@@ -10,10 +10,9 @@ describe('sanitizeFilename', () => {
     expect(sanitizeFilename('中文标题测试')).toBe('中文标题测试');
   });
 
-  it('should truncate to 50 characters', () => {
-    const longName =
-      '这是一个非常非常非常非常非常非常非常非常非常非常非常非常非常长的标题';
-    expect(sanitizeFilename(longName).length).toBeLessThanOrEqual(50);
+  it('should truncate to 200 characters', () => {
+    const longName = '这是一个非常长的标题'.repeat(30); // 300 字符
+    expect(sanitizeFilename(longName).length).toBeLessThanOrEqual(200);
   });
 
   it('should trim whitespace', () => {

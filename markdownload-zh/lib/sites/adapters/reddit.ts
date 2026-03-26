@@ -4,6 +4,7 @@
  * ⚠️ extractRedditContent() 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
  */
 import type { SiteAdapter } from '../../types';
+import { isPlaceholderSrc } from '@/utils/lazy-image';
 
 /**
  * 专门为 Reddit 提取内容
@@ -64,16 +65,14 @@ function extractRedditContent(
       // 获取最佳图片 URL（优先 src，然后各种 data-* 属性）
       let imgSrc = img.getAttribute('src') || '';
 
-      // Reddit 图片可能使用 data-lazy-src 或其他属性
-      if (!imgSrc || imgSrc.includes('placeholder') || imgSrc.startsWith('data:')) {
+      if (isPlaceholderSrc(imgSrc)) {
         imgSrc = img.getAttribute('data-src') ||
                  img.getAttribute('data-lazy-src') ||
                  img.getAttribute('data-preview-src') ||
                  '';
       }
 
-      // 过滤掉非实际图片的 URL
-      if (imgSrc && !imgSrc.includes('pixel') && !imgSrc.includes('spacer')) {
+      if (imgSrc && !isPlaceholderSrc(imgSrc)) {
         const newImg = doc.createElement('img');
         newImg.setAttribute('src', imgSrc);
         newImg.setAttribute('alt', img.getAttribute('alt') || 'Reddit image');
@@ -90,7 +89,7 @@ function extractRedditContent(
       galleryImages.forEach((img) => {
         const imgEl = img as HTMLImageElement;
         const imgSrc = imgEl.src || imgEl.getAttribute('data-src') || '';
-        if (imgSrc && !imgSrc.includes('placeholder')) {
+        if (imgSrc && !isPlaceholderSrc(imgSrc)) {
           const newImg = doc.createElement('img');
           newImg.setAttribute('src', imgSrc);
           newImg.setAttribute('alt', imgEl.alt || 'Reddit gallery image');

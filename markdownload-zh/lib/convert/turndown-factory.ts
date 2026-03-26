@@ -5,7 +5,7 @@
  */
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc } from '@/utils/lazy-image';
+import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc, extractFirstFromSrcset } from '@/utils/lazy-image';
 import { getSmartAlt } from './smart-alt';
 
 /**
@@ -76,8 +76,7 @@ export function getTurndownService(): TurndownService {
       if (!src) {
         const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset');
         if (srcset) {
-          const firstUrl = srcset.split(',')[0]?.trim().split(' ')[0] || '';
-          src = normalizeImageUrl(firstUrl, baseUrl) || '';
+          src = normalizeImageUrl(extractFirstFromSrcset(srcset) || '', baseUrl) || '';
         }
       }
 
@@ -102,13 +101,31 @@ export function getTurndownService(): TurndownService {
     },
   });
 
+  // 代码块语言识别：从 class="language-xxx" 提取语言标记
+  turndown.addRule('fencedCodeBlockLanguage', {
+    filter: (node) => {
+      return (
+        node.nodeName === 'PRE' &&
+        node.firstChild !== null &&
+        node.firstChild.nodeName === 'CODE'
+      );
+    },
+    replacement: (_content, node) => {
+      const code = (node as HTMLElement).querySelector('code')!;
+      const classAttr = code.getAttribute('class') || '';
+      const langMatch = classAttr.match(/(?:language-|lang-)(\S+)/);
+      const lang = langMatch ? langMatch[1] : '';
+      const text = code.textContent || '';
+      return `\n\n\`\`\`${lang}\n${text.replace(/\n$/, '')}\n\`\`\`\n\n`;
+    },
+  });
+
   turndown.addRule('emptyLinks', {
     filter: (node) => {
       return (
         node.nodeName === 'A' &&
         (!node.getAttribute('href') ||
-          node.getAttribute('href')?.startsWith('javascript:') ||
-          false)
+          node.getAttribute('href')?.startsWith('javascript:'))
       );
     },
     replacement: (content) => content,

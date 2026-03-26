@@ -24,7 +24,11 @@ site: {{siteName}}
  * 转义 YAML 双引号字符串中的特殊字符
  */
 function escapeYamlQuoted(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
 }
 
 /**

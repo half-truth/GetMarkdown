@@ -11,8 +11,7 @@ import { runPipeline } from '@/lib/pipeline';
 
 export default defineUnlistedScript(async () => {
   // 读取 Popup 设置的 requestId（用于防竞态）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const requestId = (window as any).__markdownload_requestId || '';
+  const requestId = window.__markdownload_requestId || '';
 
   const result = await runPipeline(
     document.cloneNode(true) as Document,
@@ -28,4 +27,11 @@ export default defineUnlistedScript(async () => {
       ? { code: result.error as 'NO_CONTENT' | 'EXTRACTION_FAILED', message: result.error === 'NO_CONTENT' ? '无法提取文章内容，页面可能不包含可读文章' : '提取失败' }
       : undefined,
   };
+
+  // 通知 Popup 提取完成（事件驱动，比轮询更快）
+  try {
+    chrome.runtime.sendMessage({ type: '__markdownload_done', requestId });
+  } catch {
+    // chrome.runtime 在某些注入上下文中不可用，回退到轮询
+  }
 });

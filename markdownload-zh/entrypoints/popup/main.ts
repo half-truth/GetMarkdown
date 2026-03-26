@@ -3,6 +3,8 @@ import { sanitizeFilename } from '@/utils/filename';
 import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
 import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
 
+const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
+
 // DOM 元素
 const loadingEl = document.getElementById('loading')!;
 const mainEl = document.getElementById('main')!;
@@ -38,11 +40,15 @@ async function init() {
     }
 
     // 检查是否为 chrome:// 或其他受限页面
-    if (
-      tab.url.startsWith('chrome://') ||
-      tab.url.startsWith('chrome-extension://') ||
-      tab.url.startsWith('about:')
-    ) {
+    const restrictedProtocols = [
+      'chrome://',
+      'chrome-extension://',
+      'edge://',
+      'brave://',
+      'about:',
+      'file://',
+    ];
+    if (restrictedProtocols.some((p) => tab.url!.startsWith(p))) {
       throw new Error('无法在此页面使用扩展');
     }
 
@@ -53,10 +59,8 @@ async function init() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: (rid: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const w = window as any;
-        delete w.__markdownload_extracted;
-        w.__markdownload_requestId = rid;
+        delete window.__markdownload_extracted;
+        window.__markdownload_requestId = rid;
       },
       args: [requestId],
     });
@@ -67,33 +71,57 @@ async function init() {
       files: ['extractor.js'],
     });
 
-    // 轮询等待提取结果（最多 10 秒，每 200ms 检查一次）
-    const pollForResult = async (): Promise<ExtractResult | undefined> => {
-      const maxAttempts = 50; // 10000ms / 200ms
-      for (let i = 0; i < maxAttempts; i++) {
+    // 等待提取结果：优先事件驱动，保留轮询作 fallback
+    const waitForResult = async (): Promise<ExtractResult | undefined> => {
+      const readResult = async (): Promise<ExtractResult | null> => {
         const results = await chrome.scripting.executeScript({
           target: { tabId: tab.id! },
           func: (expectedId: string) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const w = window as any;
-            const result = w.__markdownload_extracted;
+            const result = window.__markdownload_extracted;
             if (result && result.requestId === expectedId) {
-              delete w.__markdownload_extracted;
-              delete w.__markdownload_requestId;
+              delete window.__markdownload_extracted;
+              delete window.__markdownload_requestId;
               return result;
             }
             return null;
           },
           args: [requestId],
         });
-        const result = results[0]?.result as ExtractResult | undefined;
-        if (result) return result;
-        await new Promise((resolve) => setTimeout(resolve, 200));
-      }
-      return undefined;
+        return results[0]?.result as ExtractResult | null;
+      };
+
+      return new Promise<ExtractResult | undefined>((resolve) => {
+        let settled = false;
+        const settle = (r: ExtractResult | undefined) => {
+          if (settled) return;
+          settled = true;
+          chrome.runtime.onMessage.removeListener(messageListener);
+          resolve(r);
+        };
+
+        // 事件驱动：监听 extractor 完成信号
+        const messageListener = (msg: unknown) => {
+          const m = msg as { type?: string; requestId?: string } | null;
+          if (m?.type === '__markdownload_done' && m?.requestId === requestId) {
+            readResult().then((r) => settle(r || undefined));
+          }
+        };
+        chrome.runtime.onMessage.addListener(messageListener);
+
+        // 轮询 fallback（每 200ms，最多 10 秒）
+        (async () => {
+          const maxAttempts = 50;
+          for (let i = 0; i < maxAttempts && !settled; i++) {
+            const r = await readResult();
+            if (r) { settle(r); return; }
+            await new Promise((w) => setTimeout(w, 200));
+          }
+          settle(undefined);
+        })();
+      });
     };
 
-    const result = await pollForResult();
+    const result = await waitForResult();
 
     if (!result || !result.success || !result.data) {
       throw new Error(result?.error?.message || '提取失败');
@@ -129,9 +157,11 @@ function getFullMarkdown(): string {
   return renderTemplate(DEFAULT_TEMPLATE, templateData);
 }
 
+let _lastPreview = '';
 function updatePreview(): void {
   const markdown = getFullMarkdown();
-  if (!markdown) return;
+  if (!markdown || markdown === _lastPreview) return;
+  _lastPreview = markdown;
 
   previewEl.textContent = markdown;
   wordCountEl.textContent = `${markdown.length} 字符`;
@@ -155,8 +185,8 @@ async function handleDownload() {
 
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: (content: string, fname: string) => {
-        const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      func: (content: string, fname: string, mime: string) => {
+        const blob = new Blob([content], { type: mime });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -169,7 +199,7 @@ async function handleDownload() {
         // 使用 60s 超时确保大文件和 saveAs 对话框场景有足够时间完成下载
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       },
-      args: [markdown, `${filename}.md`],
+      args: [markdown, `${filename}.md`, MARKDOWN_MIME],
     });
 
     updateStatus('✅ 下载成功');
@@ -179,7 +209,7 @@ async function handleDownload() {
   }
 
   // ===== 降级 1：chrome.downloads（可能被 Chrono 改名）=====
-  const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+  const blob = new Blob([markdown], { type: MARKDOWN_MIME });
   const blobUrl = URL.createObjectURL(blob);
 
   try {

@@ -26,11 +26,12 @@ export function mergeSplitLinks(doc: Document): void {
     const currentHref = current.getAttribute('href');
     if (!currentHref) continue;
 
-    // 查找紧邻的下一个兄弟节点
+    // 查找紧邻的下一个兄弟节点，收集跳过的空白节点
     let nextNode = current.nextSibling;
+    const skippedWhitespace: Text[] = [];
 
-    // 跳过空白文本节点
     while (nextNode && nextNode.nodeType === Node.TEXT_NODE && !nextNode.textContent?.trim()) {
+      skippedWhitespace.push(nextNode as Text);
       nextNode = nextNode.nextSibling;
     }
 
@@ -44,8 +45,11 @@ export function mergeSplitLinks(doc: Document): void {
       const nextHref = nextLink.getAttribute('href');
 
       if (currentHref === nextHref) {
-        // 合并文本内容到当前链接
-        current.textContent = (current.textContent || '') + (nextLink.textContent || '');
+        // 合并文本内容到当前链接，保留被跳过的空白
+        const whitespace = skippedWhitespace.map((n) => n.textContent || '').join('');
+        current.textContent = (current.textContent || '') + whitespace + (nextLink.textContent || '');
+        // 移除被跳过的空白节点
+        skippedWhitespace.forEach((n) => n.remove());
         nextLink.remove();
         // 重新处理当前位置（可能还有更多相邻链接）
         i--;
@@ -159,8 +163,9 @@ export function replaceTikTokImagePlaceholders(doc: Document): void {
         parent.replaceChild(img, textNode);
       } else {
         // 如果占位符是文本的一部分，需要分割文本
-        const before = text.substring(0, text.indexOf('图示占位符'));
-        const after = text.substring(text.indexOf('图示占位符') + 5);
+        const idx = text.indexOf('图示占位符');
+        const before = text.substring(0, idx);
+        const after = text.substring(idx + 5);
 
         const beforeNode = doc.createTextNode(before.replace('[', ''));
         const afterNode = doc.createTextNode(after.replace(']', ''));

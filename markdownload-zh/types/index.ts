@@ -56,5 +56,6 @@ export type ExtractionResult = ExtractResult;
 declare global {
   interface Window {
     __markdownload_extracted?: ExtractResult;
+    __markdownload_requestId?: string;
   }
 }

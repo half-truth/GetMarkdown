@@ -40,6 +40,14 @@ export function normalizeImageUrl(value: string, baseUrl: string): string | null
 /**
  * 判断 src 是否为占位图（需要被替换）
  */
+/**
+ * 从 srcset 属性提取第一个 URL
+ */
+export function extractFirstFromSrcset(srcset: string | null): string | null {
+  if (!srcset) return null;
+  return srcset.split(',')[0]?.trim().split(' ')[0] || null;
+}
+
 export function isPlaceholderSrc(src: string | null): boolean {
   if (!src) return true;
   if (src.startsWith('data:')) return true;
