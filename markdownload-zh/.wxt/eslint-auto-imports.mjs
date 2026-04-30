@@ -42,6 +42,7 @@ const globals = {
   "defineContentScript": true,
   "defineUnlistedScript": true,
   "defineWxtPlugin": true,
+  "extractFirstFromSrcset": true,
   "fakeBrowser": true,
   "formatDate": true,
   "formatDateTime": true,

@@ -43,6 +43,8 @@ export interface ExtractResult {
     code: 'PAGE_NOT_ACCESSIBLE' | 'EXTRACTION_FAILED' | 'TIMEOUT' | 'NO_CONTENT';
     message: string;
   };
+  /** 阶段打点（Date.now() 毫秒），用于性能分析，仅诊断用途 */
+  _perf?: Record<string, number>;
 }
 
 /**

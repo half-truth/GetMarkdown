@@ -15,6 +15,7 @@ declare global {
   const defineContentScript: typeof import('wxt/utils/define-content-script').defineContentScript
   const defineUnlistedScript: typeof import('wxt/utils/define-unlisted-script').defineUnlistedScript
   const defineWxtPlugin: typeof import('wxt/utils/define-wxt-plugin').defineWxtPlugin
+  const extractFirstFromSrcset: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/lazy-image').extractFirstFromSrcset
   const fakeBrowser: typeof import('wxt/testing').fakeBrowser
   const formatDate: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/id').formatDate
   const formatDateTime: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/id').formatDateTime

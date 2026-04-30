@@ -3,17 +3,15 @@
  */
 
 /**
- * 零宽字符正则
- * - U+200B: Zero Width Space
- * - U+200C: Zero Width Non-Joiner
- * - U+200D: Zero Width Joiner
- * - U+200E: Left-to-Right Mark
- * - U+200F: Right-to-Left Mark
- * - U+2060: Word Joiner
- * - U+FEFF: BOM / Zero Width No-Break Space
+ * 零宽与不可见格式字符正则
+ * 覆盖：软连字符 (U+00AD)、阿拉伯字母标记 (U+061C)、蒙古元音分隔符 (U+180E)、
+ *       零宽空格族 (U+200B-200F)、行/段分隔符与双向控制 (U+2028-202F)、
+ *       Word Joiner 及不可见操作符 (U+2060-206F)、BOM (U+FEFF)。
+ * 飞书等富文本编辑器会污染文本（如 U+2029 段分隔符），需完整覆盖。
  */
 // eslint-disable-next-line no-misleading-character-class
-const ZERO_WIDTH_CHARS = /[\u200B\u200C\u200D\u200E\u200F\u2060\uFEFF]/g;
+const ZERO_WIDTH_CHARS =
+  /[\u00AD\u061C\u180E\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
 /**
  * 移除零宽字符

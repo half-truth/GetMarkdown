@@ -156,19 +156,10 @@ export const yuqueAdapter = createSimpleAdapter({
   fallbackSelectors: ['.yuque-doc-content', '.lake-content', 'article'],
 });
 
-export const feishuAdapter = createSimpleAdapter({
-  id: 'feishu',
-  match: 'feishu.cn',
-  siteName: '飞书文档',
-  removeSelectors: [
-    '.sidebar', '.comment-panel', '.doc-header-bar',
-    '.share-menu', '[class*="ad"]',
-  ],
-  fallbackSelectors: ['.docx-content', '.doc-content', 'article'],
-});
-
 /**
  * 所有中文技术社区适配器
+ *
+ * 飞书文档已迁移到独立适配器 ./feishu.ts（需要虚拟滚动处理）
  */
 export const chineseTechAdapters: SiteAdapter[] = [
   juejinAdapter,
@@ -183,5 +174,4 @@ export const chineseTechAdapters: SiteAdapter[] = [
   aliyunDevAdapter,
   tencentCloudAdapter,
   yuqueAdapter,
-  feishuAdapter,
 ];

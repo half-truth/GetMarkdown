@@ -19,7 +19,7 @@ declare module '#imports' {
   export { fakeBrowser } from 'wxt/testing';
   export { sanitizeFilename } from '../utils/filename';
   export { generateId, formatDate, formatDateTime } from '../utils/id';
-  export { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc } from '../utils/lazy-image';
+  export { LAZY_IMAGE_ATTRS, normalizeImageUrl, extractFirstFromSrcset, isPlaceholderSrc } from '../utils/lazy-image';
   export { DEFAULT_TEMPLATE, renderTemplate } from '../utils/template';
   export { removeZeroWidthChars, isPlaceholderAlt } from '../utils/text-cleanup';
 }

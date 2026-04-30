@@ -14,6 +14,7 @@ import { qqNewsAdapter } from './adapters/qq-news';
 import { tiktokShopAdapter } from './adapters/tiktok-shop';
 import { csdnAdapter } from './adapters/csdn';
 import { zhihuAdapter } from './adapters/zhihu';
+import { feishuAdapter } from './adapters/feishu';
 import { chineseTechAdapters } from './adapters/chinese-tech';
 import { newsAdapters } from './adapters/news';
 import { techBlogAdapters } from './adapters/tech-blogs';
@@ -30,6 +31,7 @@ registerAdapter(qqNewsAdapter);
 registerAdapter(tiktokShopAdapter);
 registerAdapter(csdnAdapter);
 registerAdapter(zhihuAdapter);
+registerAdapter(feishuAdapter);
 
 // 2. 中文技术社区
 registerAdapters(chineseTechAdapters);

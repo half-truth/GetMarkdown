@@ -5,6 +5,32 @@ import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
 
 const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
 
+// 提取结果轮询：飞书等虚拟滚动站点需要最长约 25s（HARD_CEILING_MS）
+const POLL_INTERVAL_MS = 200;
+const POLL_TIMEOUT_MS = 30_000;
+const MAX_POLL_ATTEMPTS = Math.floor(POLL_TIMEOUT_MS / POLL_INTERVAL_MS);
+
+// ---------- 阶段打点（诊断用）----------
+const popupMarks: Record<string, number> = {};
+const mark = (name: string) => {
+  popupMarks[name] = Date.now();
+};
+mark('popup_ready');
+
+function printPerf(extractorMarks?: Record<string, number>): void {
+  const all: Record<string, number> = { ...popupMarks, ...(extractorMarks || {}) };
+  const entries = Object.entries(all).sort((a, b) => a[1] - b[1]);
+  if (entries.length === 0) return;
+  const t0 = entries[0][1];
+  const rows = entries.map(([stage, t], i) => ({
+    stage,
+    'at (ms)': t - t0,
+    'delta (ms)': i === 0 ? 0 : t - entries[i - 1][1],
+  }));
+  console.log('[MD-perf] 阶段耗时（ms，从第一个标记起算）');
+  console.table(rows);
+}
+
 const RESTRICTED_PROTOCOLS = [
   'chrome://',
   'chrome-extension://',
@@ -34,6 +60,7 @@ let sessionCapturedAt: string;
 let currentData: ExtractedData | null = null;
 
 async function init() {
+  mark('init_start');
   showLoading();
 
   // 生成会话级 ID 和日期（整个会话只生成一次）
@@ -43,6 +70,7 @@ async function init() {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    mark('tab_queried');
 
     if (!tab.id || !tab.url) {
       throw new Error('无法获取当前标签页');
@@ -65,12 +93,14 @@ async function init() {
       },
       args: [requestId],
     });
+    mark('clear_done');
 
     // 注入 content script 文件（包含 Readability.js 和 Turndown）
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ['extractor.js'],
     });
+    mark('inject_done');
 
     // 等待提取结果：优先事件驱动，保留轮询作 fallback
     const waitForResult = async (): Promise<ExtractResult | undefined> => {
@@ -109,13 +139,11 @@ async function init() {
         };
         chrome.runtime.onMessage.addListener(messageListener);
 
-        // 轮询 fallback（每 200ms，最多 10 秒）
         (async () => {
-          const maxAttempts = 50;
-          for (let i = 0; i < maxAttempts && !settled; i++) {
+          for (let i = 0; i < MAX_POLL_ATTEMPTS && !settled; i++) {
             const r = await readResult();
             if (r) { settle(r); return; }
-            await new Promise((w) => setTimeout(w, 200));
+            await new Promise((w) => setTimeout(w, POLL_INTERVAL_MS));
           }
           settle(undefined);
         })();
@@ -123,8 +151,10 @@ async function init() {
     };
 
     const result = await waitForResult();
+    mark('result_received');
 
     if (!result || !result.success || !result.data) {
+      printPerf(result?._perf);
       throw new Error(result?.error?.message || '提取失败');
     }
 
@@ -133,7 +163,10 @@ async function init() {
 
     titleInput.value = currentData.title;
     updatePreview();
+    mark('preview_rendered');
     updateStatus(`来源: ${new URL(currentData.url).hostname}`);
+
+    printPerf(result._perf);
   } catch (error) {
     showError(error instanceof Error ? error.message : '未知错误');
   }
@@ -173,9 +206,13 @@ function updatePreview(): void {
 async function handleDownload() {
   if (!currentData) return;
 
+  const dlStart = Date.now();
+  popupMarks.download_click = dlStart;
+
   const title = titleInput.value || currentData.title || 'untitled';
   const filename = sanitizeFilename(title);
   const markdown = getFullMarkdown();
+  popupMarks.download_markdown_ready = Date.now();
 
   // ===== 优先：Content Script 注入下载（绕过 Chrono）=====
   // 原理：在目标网页上下文中创建 blob URL，其 origin 为网页域名（如 blob:https://example.com/...）
@@ -202,6 +239,13 @@ async function handleDownload() {
       },
       args: [markdown, `${filename}.md`, MARKDOWN_MIME],
     });
+    popupMarks.download_injected = Date.now();
+
+    console.log(
+      `[MD-perf] 下载注入耗时: ${popupMarks.download_injected - dlStart}ms ` +
+        `(markdown 渲染 ${popupMarks.download_markdown_ready - dlStart}ms, ` +
+        `executeScript ${popupMarks.download_injected - popupMarks.download_markdown_ready}ms)`
+    );
 
     updateStatus('✅ 下载成功');
     return;
