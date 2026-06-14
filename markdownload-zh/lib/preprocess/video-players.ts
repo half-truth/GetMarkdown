@@ -1,11 +1,11 @@
 /**
- * 通用视频播放器过滤
+ * Generic video player filtering
  *
- * 从 extractor.unlisted.ts removeVideoPlayers() 原样迁移
+ * Migrated as-is from extractor.unlisted.ts removeVideoPlayers()
  */
 
 /**
- * 视频播放器选择器（通用）
+ * Video player selectors (generic)
  */
 const VIDEO_PLAYER_SELECTORS = [
   'video',
@@ -21,14 +21,14 @@ const VIDEO_PLAYER_SELECTORS = [
 const POSTER_SELECTOR = 'img[class*="poster"], img[class*="cover"], img[class*="thumbnail"]';
 
 /**
- * 通用视频播放器过滤：移除播放器 UI，保留封面图
+ * Generic video player filtering: remove player UI, preserve the poster image
  */
 export function removeVideoPlayers(doc: Document): void {
   doc.querySelectorAll(VIDEO_PLAYER_SELECTORS.join(', ')).forEach((el) => {
     const poster = el.querySelector(POSTER_SELECTOR);
     if (poster && el.parentElement) {
       const clonedPoster = poster.cloneNode(true) as HTMLImageElement;
-      clonedPoster.alt ||= '[视频封面]';
+      clonedPoster.alt ||= '[Video Poster]';
       el.parentElement.insertBefore(clonedPoster, el);
     }
     el.remove();

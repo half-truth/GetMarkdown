@@ -1,8 +1,10 @@
 /**
- * Discourse 论坛适配器
+ * Discourse forum adapter
  *
- * Linux.do 这类 Discourse 主题页里，主帖、回复、相关主题都在同一页面。
- * Readability 偶尔能抽到主帖文本，但容易丢图片/代码或把论坛噪音带进去。
+ * On Discourse topic pages like Linux.do, the main post, replies, and
+ * related topics are all on the same page. Readability occasionally
+ * extracts the main post text, but tends to miss images/code or pull
+ * in forum noise.
  */
 import type { SiteAdapter } from '../../types';
 
@@ -83,7 +85,7 @@ function isImageLikeUrl(href: string, baseUrl: string): string {
       return url.href;
     }
   } catch {
-    // 忽略非法 URL，保留原始 DOM。
+    // Ignore invalid URLs and keep the original DOM as-is.
   }
   return '';
 }

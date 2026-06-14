@@ -1,10 +1,10 @@
 /**
- * 适配器工厂函数
+ * Adapter factory functions
  */
 import type { SiteAdapter } from '../types';
 
 /**
- * 新闻站点基础移除选择器
+ * News site base remove selectors
  */
 const NEWS_BASE_SELECTORS = [
   'nav', '.navigation', '.sidebar', '.related-articles',
@@ -12,7 +12,7 @@ const NEWS_BASE_SELECTORS = [
 ];
 
 /**
- * 技术博客基础移除选择器
+ * Tech blog base remove selectors
  */
 const TECH_BLOG_BASE_SELECTORS = [
   '.sidebar', '.comments', '.author-card', '.share-buttons',
@@ -20,7 +20,7 @@ const TECH_BLOG_BASE_SELECTORS = [
 ];
 
 /**
- * 创建新闻站点适配器
+ * Create news site adapter
  */
 export function createNewsAdapter(
   config: Partial<SiteAdapter> & { id: string; match: SiteAdapter['match'] }
@@ -32,7 +32,7 @@ export function createNewsAdapter(
 }
 
 /**
- * 创建技术博客适配器
+ * Create tech blog adapter
  */
 export function createTechBlogAdapter(
   config: Partial<SiteAdapter> & { id: string; match: SiteAdapter['match'] }
@@ -44,7 +44,7 @@ export function createTechBlogAdapter(
 }
 
 /**
- * 创建简单适配器（仅选择器）
+ * Create simple adapter (selectors only)
  */
 export function createSimpleAdapter(
   config: Partial<SiteAdapter> & { id: string; match: SiteAdapter['match'] }

@@ -1,7 +1,8 @@
 /**
- * AI 常用国外站点适配器集合
+ * Collection of commonly used international AI site adapters
  *
- * 目标是覆盖 AI 研究/开发日常剪藏的动态页、论文页、模型页和官方博客。
+ * Aims to cover news pages, paper pages, model pages, and official blogs
+ * commonly bookmarked in daily AI research/development.
  */
 import type { SiteAdapter } from '../../types';
 import { createSimpleAdapter, createTechBlogAdapter } from '../helpers';

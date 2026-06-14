@@ -1,12 +1,12 @@
 /**
- * 智能图片 alt 文本提取
+ * Smart image alt text extraction
  *
- * 从 extractor.unlisted.ts getSmartAlt() 原样迁移
+ * Migrated as-is from extractor.unlisted.ts getSmartAlt()
  */
 import { isPlaceholderAlt } from '@/utils/text-cleanup';
 
 /**
- * 清理 alt 文本：剥离换行、转义 Markdown 图片语法中的特殊字符 [ ]
+ * Sanitize alt text: strip newlines, escape Markdown image syntax special characters [ ]
  */
 function sanitizeAlt(text: string): string {
   return text
@@ -17,12 +17,12 @@ function sanitizeAlt(text: string): string {
 }
 
 /**
- * 智能提取图片 alt 文本
+ * Smartly extract image alt text
  */
 export function getSmartAlt(img: HTMLImageElement): string {
   let raw = '';
 
-  // 1. 原有 alt（如果有意义）
+  // 1. Original alt (if meaningful)
   const originalAlt = img.getAttribute('alt');
   if (originalAlt && !isPlaceholderAlt(originalAlt)) {
     raw = originalAlt;
@@ -46,7 +46,7 @@ export function getSmartAlt(img: HTMLImageElement): string {
     if (ariaLabel && ariaLabel.trim()) raw = ariaLabel.trim();
   }
 
-  // 5. figcaption（如果在 figure 中）
+  // 5. figcaption (if inside a figure)
   if (!raw) {
     const figure = img.closest('figure');
     if (figure) {
@@ -60,6 +60,6 @@ export function getSmartAlt(img: HTMLImageElement): string {
     }
   }
 
-  // 统一清理：剥离换行 + 转义 Markdown 图片语法特殊字符
+  // Unified cleanup: strip newlines + escape Markdown image syntax special characters
   return raw ? sanitizeAlt(raw) : '';
 }

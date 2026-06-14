@@ -1,16 +1,15 @@
-import { generateId, formatDate, formatDateTime } from '@/utils/id';
 import { sanitizeFilename } from '@/utils/filename';
 import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
 import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
 
 const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
 
-// 提取结果轮询：飞书等虚拟滚动站点需要最长约 25s（HARD_CEILING_MS）
+// Poll for extraction results: virtual-scroll sites like Feishu need ~25s max (HARD_CEILING_MS)
 const POLL_INTERVAL_MS = 200;
 const POLL_TIMEOUT_MS = 30_000;
 const MAX_POLL_ATTEMPTS = Math.floor(POLL_TIMEOUT_MS / POLL_INTERVAL_MS);
 
-// ---------- 阶段打点（诊断用）----------
+// ---------- Phase Marks (diagnostic) ----------
 const popupMarks: Record<string, number> = {};
 const mark = (name: string) => {
   popupMarks[name] = Date.now();
@@ -27,7 +26,7 @@ function printPerf(extractorMarks?: Record<string, number>): void {
     'at (ms)': t - t0,
     'delta (ms)': i === 0 ? 0 : t - entries[i - 1][1],
   }));
-  console.log('[MD-perf] 阶段耗时（ms，从第一个标记起算）');
+console.log('[MD-perf] Phase durations (ms, from first mark)');
   console.table(rows);
 }
 
@@ -40,7 +39,7 @@ const RESTRICTED_PROTOCOLS = [
   'file://',
 ];
 
-// DOM 元素
+// DOM Elements
 const loadingEl = document.getElementById('loading')!;
 const mainEl = document.getElementById('main')!;
 const errorEl = document.getElementById('error')!;
@@ -53,38 +52,30 @@ const btnCopy = document.getElementById('btn-copy')!;
 const btnRetry = document.getElementById('btn-retry')!;
 const errorMessageEl = document.getElementById('error-message')!;
 
-// 会话级状态：ID 和日期只生成一次
-let sessionId: string;
-let sessionDate: string;
-let sessionCapturedAt: string;
+// Session-level state
 let currentData: ExtractedData | null = null;
 
 async function init() {
   mark('init_start');
-  showLoading();
-
-  // 生成会话级 ID 和日期（整个会话只生成一次）
-  sessionId = generateId();
-  sessionDate = formatDate();
-  sessionCapturedAt = formatDateTime();
+showLoading();
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     mark('tab_queried');
 
     if (!tab.id || !tab.url) {
-      throw new Error('无法获取当前标签页');
+throw new Error('Unable to access current tab');
     }
 
-    // 检查是否为 chrome:// 或其他受限页面
+    // Check for chrome:// or other restricted pages
     if (RESTRICTED_PROTOCOLS.some((p) => tab.url!.startsWith(p))) {
-      throw new Error('无法在此页面使用扩展');
+throw new Error('Extension not available on this page');
     }
 
-    // 生成唯一 requestId 防止读取到过期结果
+    // Generate unique requestId to prevent reading stale results
     const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-    // 清除旧结果 + 写入 requestId
+    // Clear old results + write requestId
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: (rid: string) => {
@@ -95,14 +86,14 @@ async function init() {
     });
     mark('clear_done');
 
-    // 注入 content script 文件（包含 Readability.js 和 Turndown）
+    // Inject content script file (includes Readability.js and Turndown)
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ['extractor.js'],
     });
     mark('inject_done');
 
-    // 等待提取结果：优先事件驱动，保留轮询作 fallback
+    // Wait for extraction: event-driven first, polling as fallback
     const waitForResult = async (): Promise<ExtractResult | undefined> => {
       const readResult = async (): Promise<ExtractResult | null> => {
         const results = await chrome.scripting.executeScript({
@@ -130,7 +121,7 @@ async function init() {
           resolve(r);
         };
 
-        // 事件驱动：监听 extractor 完成信号
+        // Event-driven: listen for extractor done signal
         const messageListener = (msg: unknown) => {
           const m = msg as { type?: string; requestId?: string } | null;
           if (m?.type === '__markdownload_done' && m?.requestId === requestId) {
@@ -155,7 +146,7 @@ async function init() {
 
     if (!result || !result.success || !result.data) {
       printPerf(result?._perf);
-      throw new Error(result?.error?.message || '提取失败');
+throw new Error(result?.error?.message || 'Extraction failed');
     }
 
     currentData = result.data;
@@ -164,24 +155,20 @@ async function init() {
     titleInput.value = currentData.title;
     updatePreview();
     mark('preview_rendered');
-    updateStatus(`来源: ${new URL(currentData.url).hostname}`);
+    updateStatus('');
 
     printPerf(result._perf);
   } catch (error) {
-    showError(error instanceof Error ? error.message : '未知错误');
+showError(error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
 function createTemplateData(): TemplateData | null {
   if (!currentData) return null;
-  return {
+return {
     title: titleInput.value || currentData.title,
     url: currentData.url,
-    date: sessionDate,
-    id: sessionId,
     content: currentData.markdown,
-    siteName: currentData.siteName,
-    capturedAt: sessionCapturedAt,
   };
 }
 
@@ -198,11 +185,11 @@ function updatePreview(): void {
   _lastPreview = markdown;
 
   previewEl.textContent = markdown;
-  wordCountEl.textContent = `${markdown.length} 字符`;
+  wordCountEl.textContent = `${markdown.length} chars`;
 }
 
-// 下载处理：优先通过 Content Script 注入到目标页面下载（绕过 Chrono 拦截）
-// 降级链：Content Script 注入 → chrome.downloads → <a download> 兜底
+// Download: inject via Content Script to bypass Chrono interception
+// Fallback chain: Content Script injection → chrome.downloads → <a download> last resort
 async function handleDownload() {
   if (!currentData) return;
 
@@ -214,12 +201,12 @@ async function handleDownload() {
   const markdown = getFullMarkdown();
   popupMarks.download_markdown_ready = Date.now();
 
-  // ===== 优先：Content Script 注入下载（绕过 Chrono）=====
-  // 原理：在目标网页上下文中创建 blob URL，其 origin 为网页域名（如 blob:https://example.com/...）
-  // 而非扩展域名（blob:chrome-extension://...），Chrono 不会拦截此类下载
+  // ===== Primary: Content Script injection download (bypass Chrono) =====
+  // Principle: Create blob URL in the target page context so its origin is the page domain
+  // rather than the extension origin, so Chrono won't intercept the download
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab.id) throw new Error('无法获取标签页');
+    if (!tab.id) throw new Error('Unable to access tab');
 
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -233,8 +220,8 @@ async function handleDownload() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        // 延迟释放 Blob URL：Content Script 上下文无法用 onChanged 监听，
-        // 使用 60s 超时确保大文件和 saveAs 对话框场景有足够时间完成下载
+        // Delay releasing Blob URL: Content Script context cannot use onChanged listener,
+        // use 60s timeout to ensure large files and saveAs dialogs have enough time
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       },
       args: [markdown, `${filename}.md`, MARKDOWN_MIME],
@@ -242,18 +229,18 @@ async function handleDownload() {
     popupMarks.download_injected = Date.now();
 
     console.log(
-      `[MD-perf] 下载注入耗时: ${popupMarks.download_injected - dlStart}ms ` +
-        `(markdown 渲染 ${popupMarks.download_markdown_ready - dlStart}ms, ` +
+      `[MD-perf] Download injection: ${popupMarks.download_injected - dlStart}ms ` +
+        `(markdown render ${popupMarks.download_markdown_ready - dlStart}ms, ` +
         `executeScript ${popupMarks.download_injected - popupMarks.download_markdown_ready}ms)`
     );
 
-    updateStatus('✅ 下载成功');
+    updateStatus('✅ Download successful');
     return;
   } catch (err) {
-    console.warn('[MarkDownload] Content Script 注入下载失败, 降级到 chrome.downloads:', err);
+    console.warn('[GetMarkdown] Content Script injection download failed, falling back to chrome.downloads:', err);
   }
 
-  // ===== 降级 1：chrome.downloads（可能被 Chrono 改名）=====
+  // ===== Fallback 1: chrome.downloads (may be intercepted by Chrono) =====
   const blob = new Blob([markdown], { type: MARKDOWN_MIME });
   const blobUrl = URL.createObjectURL(blob);
 
@@ -265,7 +252,7 @@ async function handleDownload() {
     });
 
     let cleaned = false;
-    // 先设置安全超时，确保即使 addListener 抛异常也能清理 Blob URL
+    // Set safety timeout to ensure Blob URL is released even if addListener throws
     const safetyTimer = setTimeout(() => {
       if (cleaned) return;
       cleaned = true;
@@ -292,9 +279,9 @@ async function handleDownload() {
 
     chrome.downloads.onChanged.addListener(listener);
 
-    updateStatus('✅ 下载成功');
+    updateStatus('✅ Download successful');
   } catch {
-    // ===== 降级 2：<a download> 兜底 =====
+    // ===== Fallback 2: <a download> last resort =====
     try {
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -305,10 +292,10 @@ async function handleDownload() {
 
       setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
-      updateStatus('✅ 下载成功');
+      updateStatus('✅ Download successful');
     } catch (error) {
       URL.revokeObjectURL(blobUrl);
-      updateStatus(`❌ 下载失败: ${error}`);
+updateStatus(`❌ Download failed: ${error}`);
     }
   }
 }
@@ -318,13 +305,13 @@ async function handleCopy() {
 
   try {
     await navigator.clipboard.writeText(markdown);
-    updateStatus('✅ 已复制到剪贴板');
+    updateStatus('✅ Copied to clipboard');
   } catch (error) {
-    updateStatus('❌ 复制失败');
+    updateStatus('❌ Copy failed');
   }
 }
 
-// UI 状态切换
+// UI State Management
 function showLoading() {
   loadingEl.classList.remove('hidden');
   mainEl.classList.add('hidden');
@@ -348,11 +335,11 @@ function updateStatus(message: string) {
   statusEl.textContent = message;
 }
 
-// 事件绑定
+// Event Binding
 titleInput.addEventListener('input', updatePreview);
 btnDownload.addEventListener('click', handleDownload);
 btnCopy.addEventListener('click', handleCopy);
 btnRetry.addEventListener('click', init);
 
-// 启动
+// Start
 init();

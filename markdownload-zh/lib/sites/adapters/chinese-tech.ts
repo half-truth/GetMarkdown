@@ -1,7 +1,7 @@
 /**
- * 中文技术社区适配器集合
+ * Chinese tech community adapter collection
  *
- * 原样搬迁自 extractor.unlisted.ts 的选择器配置
+ * Selector configurations ported from extractor.unlisted.ts
  */
 import type { SiteAdapter } from '../../types';
 import { createSimpleAdapter } from '../helpers';
@@ -10,7 +10,7 @@ import { safeRemoveElements } from '../../preprocess/dom-utils';
 export const juejinAdapter: SiteAdapter = {
   id: 'juejin',
   match: 'juejin.cn',
-  siteName: '掘金',
+  siteName: 'Juejin',
   removeSelectors: [
     '.sidebar', '.article-suspended-panel', '.recommended-area',
     '.comment-box', '.tag-list-box', '.author-info-box',
@@ -23,7 +23,7 @@ export const juejinAdapter: SiteAdapter = {
 export const cnblogsAdapter: SiteAdapter = {
   id: 'cnblogs',
   match: 'cnblogs.com',
-  siteName: '博客园',
+  siteName: 'Cnblogs',
   removeSelectors: [
     '#sideBar', '#sidebar', '.sidebar',
     '#comment_form', '#comment_form_container', '.commentform',
@@ -40,7 +40,7 @@ export const cnblogsAdapter: SiteAdapter = {
 export const jianshuAdapter: SiteAdapter = {
   id: 'jianshu',
   match: 'jianshu.com',
-  siteName: '简书',
+  siteName: 'Jianshu',
   removeSelectors: [
     '[data-component="aside"]', '[data-component="sidebar"]',
     '.note-comment', '.follow-detail', '.follow-button',
@@ -55,7 +55,7 @@ export const jianshuAdapter: SiteAdapter = {
 export const oschinaAdapter = createSimpleAdapter({
   id: 'oschina',
   match: 'oschina.net',
-  siteName: '开源中国',
+  siteName: 'OSChina',
   removeSelectors: [
     '.ad-wrap', '.recommend-box', '.article-box__meta',
     '#commentForm', '.comment-list', '.sidebar',
@@ -91,7 +91,7 @@ export const cto51Adapter = createSimpleAdapter({
 export const infoqCnAdapter = createSimpleAdapter({
   id: 'infoq-cn',
   match: 'infoq.cn',
-  siteName: 'InfoQ 中文',
+  siteName: 'InfoQ China',
   removeSelectors: [
     '.article-sidebar', '.comment-section', '.recommend-articles',
     '.author-info', '.article-tags', '.share-buttons',
@@ -109,7 +109,7 @@ export const v2exAdapter: SiteAdapter = {
     '#reply-box',
   ],
   preprocess(doc: Document) {
-    // :has() 选择器单独处理，某些浏览器不支持
+    // :has() selector handled separately, some browsers do not support it
     safeRemoveElements(doc, ['.cell:has(.reply_content)']);
   },
   fallbackSelectors: ['.topic_content', '.cell', '#Main'],
@@ -118,7 +118,7 @@ export const v2exAdapter: SiteAdapter = {
 export const leetcodeCnAdapter = createSimpleAdapter({
   id: 'leetcode-cn',
   match: 'leetcode.cn',
-  siteName: 'LeetCode 中文',
+  siteName: 'LeetCode China',
   removeSelectors: [
     '.side-tools-wrapper', '.discuss-container', '.submission-list',
     '[class*="ads"]', '[class*="subscription"]',
@@ -128,7 +128,7 @@ export const leetcodeCnAdapter = createSimpleAdapter({
 export const aliyunDevAdapter = createSimpleAdapter({
   id: 'aliyun-dev',
   match: 'developer.aliyun.com',
-  siteName: '阿里云开发者社区',
+  siteName: 'Aliyun Developer',
   removeSelectors: [
     '.aside', '.comment-area', '.recommend-list',
     '.author-card', '.share-area', '.ad-container',
@@ -138,7 +138,7 @@ export const aliyunDevAdapter = createSimpleAdapter({
 export const tencentCloudAdapter = createSimpleAdapter({
   id: 'tencent-cloud',
   match: 'cloud.tencent.com/developer',
-  siteName: '腾讯云开发者社区',
+  siteName: 'Tencent Cloud Developer',
   removeSelectors: [
     '.com-side-bar', '.com-comment', '.com-recommend',
     '.author-info', '.share-bar', '.ad-box',
@@ -148,7 +148,7 @@ export const tencentCloudAdapter = createSimpleAdapter({
 export const yuqueAdapter = createSimpleAdapter({
   id: 'yuque',
   match: 'yuque.com',
-  siteName: '语雀',
+  siteName: 'Yuque',
   removeSelectors: [
     '.sidebar', '.comment-section', '.catalog-container',
     '.author-info', '.share-buttons', '[class*="ad"]',
@@ -157,9 +157,9 @@ export const yuqueAdapter = createSimpleAdapter({
 });
 
 /**
- * 所有中文技术社区适配器
+ * All Chinese tech community adapters
  *
- * 飞书文档已迁移到独立适配器 ./feishu.ts（需要虚拟滚动处理）
+ * Feishu docs have been migrated to a standalone adapter ./feishu.ts (requires virtual scrolling handling)
  */
 export const chineseTechAdapters: SiteAdapter[] = [
   juejinAdapter,

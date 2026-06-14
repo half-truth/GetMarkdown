@@ -1,7 +1,7 @@
 /**
- * 国际技术社区/博客适配器集合
+ * International tech community / blog adapter collection
  *
- * 原样搬迁自 extractor.unlisted.ts 的选择器配置
+ * Ported as-is from extractor.unlisted.ts selector configuration
  */
 import type { SiteAdapter } from '../../types';
 import { createTechBlogAdapter, createSimpleAdapter } from '../helpers';
@@ -139,7 +139,7 @@ export const logrocketAdapter = createTechBlogAdapter({
 });
 
 /**
- * 所有技术博客适配器
+ * All tech blog adapters
  */
 export const techBlogAdapters: SiteAdapter[] = [
   mediumAdapter, devtoAdapter, hnAdapter, stackoverflowAdapter,

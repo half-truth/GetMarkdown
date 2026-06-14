@@ -1,7 +1,7 @@
 /**
- * 链接处理预处理器
+ * Link processing preprocessor
  *
- * 从 extractor.unlisted.ts 原样迁移:
+ * Migrated as-is from extractor.unlisted.ts:
  * - mergeSplitLinks()
  * - replaceTikTokImagePlaceholders()
  * - normalizeTikTokTables()
@@ -9,24 +9,24 @@
  */
 
 /**
- * 合并被拆分的链接
- * 某些站点（如 TikTok Shop）的链接文本被 <span> 标签切割，
- * 导致 Turndown 将每个 <a> 单独转换，产生 [Sho](url)[p](url) 这样的结果。
- * 此函数合并相邻的同 href 链接。
+ * Merge split links
+ * Some sites (e.g. TikTok Shop) have link text split by <span> tags,
+ * causing Turndown to convert each <a> separately, producing results like [Sho](url)[p](url).
+ * This function merges adjacent links with the same href.
  */
 export function mergeSplitLinks(doc: Document): void {
-  // 处理所有链接
+  // Process all links
   const allLinks = Array.from(doc.querySelectorAll('a[href]')) as HTMLAnchorElement[];
 
   for (let i = 0; i < allLinks.length - 1; i++) {
     const current = allLinks[i];
-    // 跳过已被移除的链接
+    // Skip links that have been removed
     if (!current.parentElement) continue;
 
     const currentHref = current.getAttribute('href');
     if (!currentHref) continue;
 
-    // 查找紧邻的下一个兄弟节点，收集跳过的空白节点
+    // Find the next adjacent sibling, collecting skipped whitespace nodes
     let nextNode = current.nextSibling;
     const skippedWhitespace: Text[] = [];
 
@@ -114,12 +114,12 @@ export function replaceTikTokImagePlaceholders(doc: Document): void {
   });
 
   if (imageUrlSet.size === 0) {
-    console.debug('[Markdownload] TikTok: 未找到内容图片');
+    console.debug('[Markdownload] TikTok: no content images found');
     return;
   }
 
   const imageUrls = Array.from(imageUrlSet);
-  console.debug(`[Markdownload] TikTok: 找到 ${imageUrls.length} 张内容图片`);
+  console.debug(`[Markdownload] TikTok: found  content images`);
 
   // 查找并替换占位符文本
   // 使用 TreeWalker 遍历所有文本节点
@@ -139,7 +139,7 @@ export function replaceTikTokImagePlaceholders(doc: Document): void {
     placeholderNodes.push(node);
   }
 
-  console.debug(`[Markdownload] TikTok: 找到 ${placeholderNodes.length} 个图片占位符`);
+  console.debug(`[Markdownload] TikTok: found  image placeholders`);
 
   // 为每个占位符分配一张图片
   let imageIndex = 0;
@@ -178,7 +178,7 @@ export function replaceTikTokImagePlaceholders(doc: Document): void {
     }
   });
 
-  console.debug(`[Markdownload] TikTok: 替换了 ${Math.min(imageIndex, placeholderNodes.length)} 个占位符`);
+  console.debug(`[Markdownload] TikTok: replaced  placeholders`);
 }
 
 /**

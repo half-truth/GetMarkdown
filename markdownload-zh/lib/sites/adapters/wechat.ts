@@ -1,14 +1,14 @@
 /**
- * 微信公众号适配器
+ * WeChat Official Accounts adapter
  *
- * ⚠️ 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ Ported as-is from extractor.unlisted.ts, no logic changes
  */
 import type { SiteAdapter } from '../../types';
 
 export const wechatAdapter: SiteAdapter = {
   id: 'wechat',
   match: 'mp.weixin.qq.com',
-  siteName: '微信公众号',
+  siteName: 'WeChat Official Accounts',
 
   removeSelectors: [
     '#js_pc_qr_code', '#js_share_area', '.qr_code_pc',
@@ -16,7 +16,7 @@ export const wechatAdapter: SiteAdapter = {
   ],
 
   preprocess(doc: Document) {
-    // 微信公众号图片 style 属性干扰显示
+    // WeChat Official Accounts image style attributes interfere with display
     doc.querySelectorAll('img').forEach((img) => img.removeAttribute('style'));
   },
 

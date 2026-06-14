@@ -1,7 +1,7 @@
 /**
- * Turndown 实例工厂 + 自定义规则
+ * Turndown instance factory + custom rules
  *
- * 从 extractor.unlisted.ts getTurndownService() 原样迁移
+ * Migrated from extractor.unlisted.ts getTurndownService()
  */
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -9,28 +9,29 @@ import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc, extractFirstFrom
 import { getSmartAlt } from './smart-alt';
 
 /**
- * TurndownService 单例（性能优化：避免重复创建实例和添加规则）
+ * TurndownService singleton (performance: avoid recreating instance and re-adding rules)
  */
 let _turndownInstance: TurndownService | null = null;
 
 /**
- * 当前转换的页面 URL（由 setBaseUrl 设置，替代 window.location.href）
+ * Current page URL for conversion (set by setBaseUrl, replaces window.location.href)
  */
 let _currentBaseUrl = '';
 
 /**
- * 设置当前页面 URL（在 convertToMarkdown 前调用）
+ * Set the current page URL (call before convertToMarkdown)
  */
 export function setBaseUrl(url: string): void {
   _currentBaseUrl = url;
 }
 
 /**
- * 获取 Turndown 服务（单例模式）
+ * Get Turndown service (singleton pattern)
  *
- * 性能优化：TurndownService 实例和规则只创建一次，后续调用直接复用。
- * 在浏览器扩展场景中，每次页面注入都会创建新的 JS 上下文，
- * 所以单例只在单个页面的生命周期内有效，不会跨页面复用。
+ * Performance optimization: TurndownService instance and rules are created only once,
+ * subsequent calls reuse them directly.
+ * In browser extension scenarios, each page injection creates a new JS context,
+ * so the singleton is only valid within a single page's lifecycle, not across pages.
  */
 export function getTurndownService(): TurndownService {
   if (_turndownInstance) {
@@ -46,12 +47,12 @@ export function getTurndownService(): TurndownService {
 
   turndown.use(gfm);
 
-  // 处理懒加载图片（支持多种 data-* 属性 + 相对路径）
+  // Handle lazy images (supports multiple data-* attrs + relative paths)
   turndown.addRule('lazyImages', {
     filter: (node) => {
       if (node.nodeName !== 'IMG') return false;
       const src = node.getAttribute('src');
-      // 如果 src 是占位符，检查是否有懒加载属性
+      // If src is a placeholder, check for lazy-load attributes
       if (isPlaceholderSrc(src)) {
         return LAZY_IMAGE_ATTRS.some((attr) => node.getAttribute(attr));
       }
@@ -62,7 +63,7 @@ export function getTurndownService(): TurndownService {
       const baseUrl = _currentBaseUrl || (typeof window !== 'undefined' ? window.location.href : '');
       let src = '';
 
-      // 按优先级尝试获取真实图片 URL
+      // Try to get the real image URL by priority
       for (const attr of LAZY_IMAGE_ATTRS) {
         const value = img.getAttribute(attr);
         const normalizedUrl = normalizeImageUrl(value || '', baseUrl);
@@ -72,7 +73,7 @@ export function getTurndownService(): TurndownService {
         }
       }
 
-      // 如果还是没有，尝试从 srcset 提取
+      // If still none, try to extract from srcset
       if (!src) {
         const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset');
         if (srcset) {
@@ -85,7 +86,7 @@ export function getTurndownService(): TurndownService {
     },
   });
 
-  // 处理 figure 元素（包含图片和说明）
+  // Handle figure elements (containing images and captions)
   turndown.addRule('figure', {
     filter: 'figure',
     replacement: (content) => {
@@ -93,7 +94,7 @@ export function getTurndownService(): TurndownService {
     },
   });
 
-  // 处理 figcaption 元素
+  // Handle figcaption elements
   turndown.addRule('figcaption', {
     filter: 'figcaption',
     replacement: (content) => {
@@ -101,7 +102,7 @@ export function getTurndownService(): TurndownService {
     },
   });
 
-  // 代码块语言识别：从 class="language-xxx" 提取语言标记
+  // Code block language detection: extract language from class="language-xxx"
   turndown.addRule('fencedCodeBlockLanguage', {
     filter: (node) => {
       return (
@@ -116,7 +117,7 @@ export function getTurndownService(): TurndownService {
       const langMatch = classAttr.match(/(?:language-|lang-)(\S+)/);
       const lang = langMatch ? langMatch[1] : '';
       const text = code.textContent || '';
-      // 动态扩展 fence 长度，避免代码中含 ``` 时产生碰撞
+      // Dynamically extend fence length to avoid collisions with ``` in code
       let fence = '```';
       const fenceRegex = /(`{3,})/g;
       let match;

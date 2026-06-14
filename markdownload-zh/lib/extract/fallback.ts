@@ -1,10 +1,10 @@
 /**
- * 后备内容提取器
+ * Fallback content extractor
  */
 import type { SiteAdapter } from '../types';
 
 /**
- * 通用后备选择器（适用于所有站点）
+ * Generic fallback selectors (applicable to all sites)
  */
 const GENERIC_FALLBACK_SELECTORS = [
   'article',
@@ -31,7 +31,7 @@ const GENERIC_FALLBACK_SELECTORS = [
 ];
 
 /**
- * 获取站点名称
+ * Get site name
  */
 function getSiteName(doc: Document, url: string): string {
   const ogSiteName = doc.querySelector('meta[property="og:site_name"]');
@@ -48,22 +48,23 @@ function getSiteName(doc: Document, url: string): string {
 }
 
 /**
- * 后备内容提取
+ * Fallback content extraction
  *
- * 当 Readability 失败时，使用适配器的 fallbackSelectors 或通用选择器提取内容。
- * 站点专用选择器已迁移到各适配器的 fallbackSelectors 字段。
+ * When Readability fails, extract content using adapter's fallbackSelectors
+ * or generic selectors.
+ * Site-specific selectors have been migrated to each adapter's fallbackSelectors field.
  */
 export function getFallbackContent(
   doc: Document,
   url: string,
   adapter: SiteAdapter | null
 ): { title: string; html: string; siteName?: string } | null {
-  // Reddit 短帖子需要更低的阈值
+  // Reddit short posts need a lower threshold
   const isReddit = url.includes('reddit.com');
   const minContentLength = isReddit ? 20 : 100;
   const minFinalLength = isReddit ? 10 : 50;
 
-  // 优先使用适配器的 fallbackSelectors
+  // Use adapter's fallbackSelectors first
   if (adapter?.fallbackSelectors) {
     for (const sel of adapter.fallbackSelectors) {
       const el = doc.querySelector(sel);
@@ -83,7 +84,7 @@ export function getFallbackContent(
     }
   }
 
-  // 通用后备选择器
+  // Generic fallback selectors
   let contentEl: Element | null = null;
   for (const sel of GENERIC_FALLBACK_SELECTORS) {
     contentEl = doc.querySelector(sel);

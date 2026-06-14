@@ -1,29 +1,25 @@
 /**
- * 提取的内容结构
+ * Structure of extracted content
  */
 export interface ExtractedContent {
   title: string;
-  content: string; // HTML 格式
+  content: string; // HTML format
   excerpt: string;
   byline: string;
   siteName: string;
 }
 
 /**
- * 模板数据
+ * Template data
  */
 export interface TemplateData {
   title: string;
   url: string;
-  date: string;
-  id: string;
-  content: string; // Markdown 格式
-  siteName?: string;
-  capturedAt?: string; // 含时分秒
+  content: string; // Markdown format
 }
 
 /**
- * 提取结果数据
+ * Extracted result data
  */
 export interface ExtractedData {
   title: string;
@@ -33,7 +29,7 @@ export interface ExtractedData {
 }
 
 /**
- * 提取结果消息（统一类型，用于 extractor 和 popup 通信）
+ * Extraction result message (unified type for communication between extractor and popup)
  */
 export interface ExtractResult {
   requestId?: string;
@@ -43,17 +39,17 @@ export interface ExtractResult {
     code: 'PAGE_NOT_ACCESSIBLE' | 'EXTRACTION_FAILED' | 'TIMEOUT' | 'NO_CONTENT';
     message: string;
   };
-  /** 阶段打点（Date.now() 毫秒），用于性能分析，仅诊断用途 */
+  /** Phase marker (Date.now() ms), for performance analysis, diagnostic only */
   _perf?: Record<string, number>;
 }
 
 /**
- * @deprecated 使用 ExtractResult 代替
+ * @deprecated Use ExtractResult instead
  */
 export type ExtractionResult = ExtractResult;
 
 /**
- * 全局 Window 扩展（用于 extractor 和 popup 通信）
+ * Global Window extension (for communication between extractor and popup)
  */
 declare global {
   interface Window {

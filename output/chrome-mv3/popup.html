@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=500, initial-scale=1.0">
+  <title>GetMarkdown</title>
+  <script type="module" crossorigin src="/chunks/popup-BIj9Jvjr.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/popup-Df5YGDvh.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Extracting content...</p>
+    </div>
+
+    <!-- Main Interface -->
+    <div id="main" class="main hidden">
+      <div class="header">
+        <input type="text" id="title" class="title-input" placeholder="Article Title" autofocus>
+      </div>
+
+      <div class="preview-container">
+        <pre id="preview" class="preview"></pre>
+      </div>
+
+      <div class="status-bar">
+        <span id="status"></span>
+        <span id="word-count"></span>
+        <div class="status-right">
+          <button id="btn-copy" class="btn btn-pill btn-pill-copy" title="Copy to clipboard">📋 Copy</button>
+          <button id="btn-download" class="btn btn-pill btn-pill-download" title="Download Markdown">⬇️ Download</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error hidden">
+      <p>❌ Extraction Failed</p>
+      <p id="error-message"></p>
+      <button id="btn-retry" class="btn">Retry</button>
+    </div>
+  </div>
+
+</body>
+</html>

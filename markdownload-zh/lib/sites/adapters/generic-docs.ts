@@ -1,7 +1,7 @@
 /**
- * 通用文档框架适配器
+ * Generic documentation framework adapter
  *
- * 原样搬迁自 extractor.unlisted.ts 的文档站点匹配逻辑
+ * Carried over unchanged from extractor.unlisted.ts documentation site matching logic
  */
 import type { SiteAdapter } from '../../types';
 
@@ -15,9 +15,9 @@ export const gitbookAdapter: SiteAdapter = {
   ],
 };
 
-// 基于 DOM 特征匹配的适配器无法在 URL 阶段匹配
-// 需要在 preprocess 阶段通过 DOM 检测
-// 以下适配器使用宽泛 URL 匹配 + DOM 检测组合
+// Adapters based on DOM feature matching cannot match at URL stage
+// Need to detect via DOM in the preprocess stage
+// The following adapters use broad URL matching + DOM detection combination
 
 export const readthedocsAdapter: SiteAdapter = {
   id: 'readthedocs',
@@ -31,7 +31,7 @@ export const readthedocsAdapter: SiteAdapter = {
 
 export const docusaurusAdapter: SiteAdapter = {
   id: 'docusaurus',
-  match: (url: string) => false, // 仅 DOM 检测
+  match: (url: string) => false, // DOM detection only
   removeSelectors: [
     '.theme-doc-sidebar-container', '.pagination-nav',
     '.navbar', '.footer', '[class*="tableOfContents"]',
@@ -40,7 +40,7 @@ export const docusaurusAdapter: SiteAdapter = {
 
 export const vuepressAdapter: SiteAdapter = {
   id: 'vuepress',
-  match: (url: string) => false, // 仅 DOM 检测
+  match: (url: string) => false, // DOM detection only
   removeSelectors: [
     '.sidebar', '.page-nav', '.navbar',
     '.vp-sidebar', '.vp-nav', '[class*="footer"]',
@@ -49,7 +49,7 @@ export const vuepressAdapter: SiteAdapter = {
 
 export const mkdocsAdapter: SiteAdapter = {
   id: 'mkdocs',
-  match: (url: string) => false, // 仅 DOM 检测
+  match: (url: string) => false, // DOM detection only
   removeSelectors: [
     '.md-sidebar', '.md-header', '.md-footer',
     '[class*="navigation"]', '[class*="search"]',
@@ -57,16 +57,16 @@ export const mkdocsAdapter: SiteAdapter = {
 };
 
 /**
- * DOM 检测匹配器
- * 在 preprocess 阶段调用，用于检测无法通过 URL 匹配的文档框架
+ * DOM detection matcher
+ * Called in the preprocess stage to detect documentation frameworks that cannot be matched by URL
  */
 export function detectDocFramework(doc: Document): SiteAdapter | null {
-  // GitBook（DOM 检测补充）
+  // GitBook (DOM detection supplement)
   if (doc.querySelector('.gitbook-root')) {
     return gitbookAdapter;
   }
 
-  // Read the Docs（DOM 检测补充）
+  // Read the Docs (DOM detection supplement)
   if (doc.querySelector('.rst-versions')) {
     return readthedocsAdapter;
   }
@@ -91,7 +91,7 @@ export function detectDocFramework(doc: Document): SiteAdapter | null {
 }
 
 /**
- * 可通过 URL 匹配的文档站点适配器
+ * Documentation site adapters that can be matched by URL
  */
 export const genericDocsAdapters: SiteAdapter[] = [
   gitbookAdapter,

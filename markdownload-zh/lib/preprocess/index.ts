@@ -1,5 +1,5 @@
 /**
- * Stage 1: DOM 预处理
+ * Stage 1: DOM Preprocessing
  */
 import type { SiteAdapter } from '../types';
 import { preprocessLazyImages } from './lazy-images';
@@ -7,15 +7,15 @@ import { normalizeTables } from './tables';
 import { removeVideoPlayers } from './video-players';
 
 /**
- * 通用清理选择器（所有站点）
+ * Universal cleanup selectors (all sites)
  */
 const UNIVERSAL_REMOVE_SELECTORS = [
-  // 广告相关（这些选择器通常很安全）
+  // Ad-related (these selectors are generally safe)
   '[id*="google_ads"]', '[class*="google-ad"]', '[class*="GoogleAd"]',
   '[id*="taboola"]', '[id*="outbrain"]', '[class*="sponsored-content"]',
-  // 社交分享按钮
+  // Social share buttons
   '.addthis_toolbox', '.shareaholic',
-  // Cookie 通知（使用更精确的选择器）
+  // Cookie notices (use more specific selectors)
   '[class*="cookie-banner"]', '[class*="cookie-consent"]',
   '[id*="cookie-notice"]', '[id*="gdpr-banner"]',
 ];
@@ -24,14 +24,14 @@ const UNIVERSAL_REMOVE_SELECTORS = [
  * 预处理 DOM（Stage 1）
  *
  * 执行顺序：
- * 1. 通用懒加载图片处理
- * 2. 通用视频播放器过滤
- * 3. 通用表格预处理
- * 4. 站点特定的 removeSelectors
- * 5. 站点特定的 preprocess 钩子
- * 6. 通用清理
+ * 1. Generic lazy image handling
+ * 2. Generic video player filtering
+ * 3. Generic table preprocessing
+ * 4. Site-specific removeSelectors
+ * 5. Site-specific preprocess hook
+ * 6. Generic cleanup
  *
- * 每个阶段失败不中断整个管线
+ * Each stage failure does not interrupt the pipeline
  */
 export async function preprocessDOM(
   doc: Document,
@@ -40,28 +40,28 @@ export async function preprocessDOM(
 ): Promise<void> {
   const baseUrl = url;
 
-  // 1. 通用懒加载处理
+  // 1. Generic lazy image handling
   try {
     preprocessLazyImages(doc, baseUrl);
   } catch (e) {
     console.warn('[Markdownload] preprocessLazyImages failed:', e);
   }
 
-  // 2. 通用视频播放器过滤
+  // 2. Generic video player filtering
   try {
     removeVideoPlayers(doc);
   } catch (e) {
     console.warn('[Markdownload] removeVideoPlayers failed:', e);
   }
 
-  // 3. 通用表格预处理
+  // 3. Generic table preprocessing
   try {
     normalizeTables(doc);
   } catch (e) {
     console.warn('[Markdownload] normalizeTables failed:', e);
   }
 
-  // 4. 站点特定的 preprocess 钩子
+  // 4. Site-specific preprocess hook
   if (adapter?.preprocess) {
     try {
       await adapter.preprocess(doc, url);
@@ -70,7 +70,7 @@ export async function preprocessDOM(
     }
   }
 
-  // 5. 合并清理：站点 removeSelectors + 通用 UNIVERSAL_REMOVE_SELECTORS（一次 querySelectorAll）
+  // 5. Combined cleanup: site removeSelectors + UNIVERSAL_REMOVE_SELECTORS (single querySelectorAll)
   try {
     const adapterSelectors = adapter?.removeSelectors || [];
     const allSelectors = [...adapterSelectors, ...UNIVERSAL_REMOVE_SELECTORS];
@@ -79,12 +79,12 @@ export async function preprocessDOM(
       const adapterSelectorStr = adapterSelectors.length > 0 ? adapterSelectors.join(', ') : '';
 
       doc.querySelectorAll(allSelectors.join(', ')).forEach((el) => {
-        // 站点特定选择器：无条件移除
+        // Site-specific selectors: unconditional removal
         if (adapterSelectorStr && el.matches(adapterSelectorStr)) {
           el.remove();
           return;
         }
-        // 通用选择器：正文区域内不删除（广告 iframe 除外）
+        // Generic selectors: don't delete inside main content (except ad iframes)
         if (mainContent && mainContent.contains(el)) {
           if (el.tagName === 'IFRAME' && (el as HTMLIFrameElement).src?.includes('ads')) {
             el.remove();

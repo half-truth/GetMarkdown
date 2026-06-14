@@ -1,36 +1,36 @@
 /**
- * 站点适配器注册表 + 匹配逻辑
+ * Site adapter registry + matching logic
  */
 import type { SiteAdapter } from '../types';
 
 /**
- * 精确 hostname 匹配 (O(1))
+ * Exact hostname match (O(1))
  */
 const exactHostMap = new Map<string, SiteAdapter>();
 
 /**
- * 域名后缀匹配（短数组遍历）
+ * Domain suffix match (short array traversal)
  */
 const suffixEntries: { suffix: string; adapter: SiteAdapter }[] = [];
 
 /**
- * 正则/函数匹配（短数组遍历）
+ * Regex/function match (short array traversal)
  */
 const patternEntries: { match: RegExp | ((url: string) => boolean); adapter: SiteAdapter }[] = [];
 
 /**
- * 注册适配器
+ * Register an adapter
  */
 export function registerAdapter(adapter: SiteAdapter): void {
   const { match } = adapter;
 
   if (typeof match === 'string') {
-    // 判断是精确 hostname 还是域名后缀
-    // 如果包含 / 或以特定路径开头，用 suffixEntries
+    // Determine if exact hostname or domain suffix
+    // If contains / or starts with specific path, use suffixEntries
     if (match.includes('/')) {
       suffixEntries.push({ suffix: match, adapter });
     } else if (match.startsWith('.') || match.includes('.')) {
-      // 域名后缀匹配
+      // Domain suffix matching
       suffixEntries.push({ suffix: match, adapter });
     } else {
       exactHostMap.set(match, adapter);
@@ -41,7 +41,7 @@ export function registerAdapter(adapter: SiteAdapter): void {
 }
 
 /**
- * 批量注册适配器
+ * Batch register adapters
  */
 export function registerAdapters(adapters: SiteAdapter[]): void {
   for (const adapter of adapters) {
@@ -50,47 +50,47 @@ export function registerAdapters(adapters: SiteAdapter[]): void {
 }
 
 /**
- * 获取匹配的站点适配器
+ * Get matching site adapter
  *
- * 匹配优先级：
- * 1. 精确 hostname (O(1))
- * 2. URL 包含后缀（短数组遍历）
- * 3. 正则/函数匹配（短数组遍历）
+ * Match priority:
+ * 1. Exact hostname (O(1))
+ * 2. URL contains suffix (short array scan)
+ * 3. Regex/function match (short array scan)
  */
 export function getSiteAdapter(url: string): SiteAdapter | null {
   let hostname = '';
   try {
     hostname = new URL(url).hostname;
   } catch {
-    // URL 解析失败，跳过精确匹配
+    // URL parse failed, skip exact match
   }
 
-  // 1. 精确 hostname
+  // 1. Exact hostname
   if (hostname) {
     const exact = exactHostMap.get(hostname);
     if (exact) return exact;
   }
 
-  // 2. 域名后缀匹配（仅对 hostname，不扫描完整 URL，避免路径/查询参数误判）
+  // 2. Domain suffix match (hostname only, avoid path/query false positives)
   for (const { suffix, adapter } of suffixEntries) {
     if (suffix.includes('/')) {
-      // 路径匹配：拼接 hostname + pathname 检查
+      // Path match: check hostname + pathname
       try {
         const parsed = new URL(url);
         const hostAndPath = parsed.hostname + parsed.pathname;
         if (hostAndPath.includes(suffix)) return adapter;
       } catch {
-        // URL 解析失败，跳过
+        // URL parse failed, skip
       }
     } else {
-      // 域名后缀匹配：仅对 hostname 操作
+      // Domain suffix matching：仅对 hostname 操作
       if (hostname === suffix || hostname.endsWith('.' + suffix)) {
         return adapter;
       }
     }
   }
 
-  // 3. 正则/函数匹配
+  // 3. Regex/function match
   for (const { match, adapter } of patternEntries) {
     if (match instanceof RegExp) {
       if (match.test(url)) return adapter;
@@ -103,7 +103,7 @@ export function getSiteAdapter(url: string): SiteAdapter | null {
 }
 
 /**
- * 清空注册表（测试用）
+ * Clear registry (testing)
  */
 export function clearRegistry(): void {
   exactHostMap.clear();

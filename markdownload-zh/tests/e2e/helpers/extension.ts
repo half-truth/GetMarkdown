@@ -1,7 +1,7 @@
 import { chromium, type BrowserContext, type Page } from '@playwright/test';
 import path from 'path';
 
-const EXTENSION_PATH = path.resolve(__dirname, '../../../.output/chrome-mv3');
+const EXTENSION_PATH = path.resolve(__dirname, '../../../../output/chrome-mv3');
 
 /**
  * 创建带有扩展的浏览器上下文

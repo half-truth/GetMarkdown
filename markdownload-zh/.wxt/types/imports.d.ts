@@ -2,9 +2,9 @@
 export {}
 declare global {
   const ContentScriptContext: typeof import('wxt/utils/content-script-context').ContentScriptContext
-  const DEFAULT_TEMPLATE: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/template').DEFAULT_TEMPLATE
+  const DEFAULT_TEMPLATE: typeof import('/Users/lu/aplugin/markdownload-zh/utils/template').DEFAULT_TEMPLATE
   const InvalidMatchPattern: typeof import('wxt/utils/match-patterns').InvalidMatchPattern
-  const LAZY_IMAGE_ATTRS: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/lazy-image').LAZY_IMAGE_ATTRS
+  const LAZY_IMAGE_ATTRS: typeof import('/Users/lu/aplugin/markdownload-zh/utils/lazy-image').LAZY_IMAGE_ATTRS
   const MatchPattern: typeof import('wxt/utils/match-patterns').MatchPattern
   const browser: typeof import('wxt/browser').browser
   const createIframeUi: typeof import('wxt/utils/content-script-ui/iframe').createIframeUi
@@ -15,18 +15,18 @@ declare global {
   const defineContentScript: typeof import('wxt/utils/define-content-script').defineContentScript
   const defineUnlistedScript: typeof import('wxt/utils/define-unlisted-script').defineUnlistedScript
   const defineWxtPlugin: typeof import('wxt/utils/define-wxt-plugin').defineWxtPlugin
-  const extractFirstFromSrcset: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/lazy-image').extractFirstFromSrcset
+  const extractFirstFromSrcset: typeof import('/Users/lu/aplugin/markdownload-zh/utils/lazy-image').extractFirstFromSrcset
   const fakeBrowser: typeof import('wxt/testing').fakeBrowser
-  const formatDate: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/id').formatDate
-  const formatDateTime: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/id').formatDateTime
-  const generateId: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/id').generateId
+  const formatDate: typeof import('/Users/lu/aplugin/markdownload-zh/utils/id').formatDate
+  const formatDateTime: typeof import('/Users/lu/aplugin/markdownload-zh/utils/id').formatDateTime
+  const generateId: typeof import('/Users/lu/aplugin/markdownload-zh/utils/id').generateId
   const injectScript: typeof import('wxt/utils/inject-script').injectScript
-  const isPlaceholderAlt: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/text-cleanup').isPlaceholderAlt
-  const isPlaceholderSrc: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/lazy-image').isPlaceholderSrc
-  const normalizeImageUrl: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/lazy-image').normalizeImageUrl
-  const removeZeroWidthChars: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/text-cleanup').removeZeroWidthChars
-  const renderTemplate: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/template').renderTemplate
-  const sanitizeFilename: typeof import('/Users/bigcongcong/SynologyDrive/于文聪的Claude code文件夹/16Markdown 下载插件/markdownload-zh/utils/filename').sanitizeFilename
+  const isPlaceholderAlt: typeof import('/Users/lu/aplugin/markdownload-zh/utils/text-cleanup').isPlaceholderAlt
+  const isPlaceholderSrc: typeof import('/Users/lu/aplugin/markdownload-zh/utils/lazy-image').isPlaceholderSrc
+  const normalizeImageUrl: typeof import('/Users/lu/aplugin/markdownload-zh/utils/lazy-image').normalizeImageUrl
+  const removeZeroWidthChars: typeof import('/Users/lu/aplugin/markdownload-zh/utils/text-cleanup').removeZeroWidthChars
+  const renderTemplate: typeof import('/Users/lu/aplugin/markdownload-zh/utils/template').renderTemplate
+  const sanitizeFilename: typeof import('/Users/lu/aplugin/markdownload-zh/utils/filename').sanitizeFilename
   const storage: typeof import('wxt/utils/storage').storage
   const useAppConfig: typeof import('wxt/utils/app-config').useAppConfig
 }

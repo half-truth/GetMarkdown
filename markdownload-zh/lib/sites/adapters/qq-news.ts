@@ -1,7 +1,7 @@
 /**
- * 腾讯新闻适配器
+ * Tencent News adapter
  *
- * ⚠️ 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ Ported verbatim from extractor.unlisted.ts, no logic changes
  */
 import type { SiteAdapter } from '../../types';
 
@@ -22,28 +22,28 @@ const qqNewsSelectors = [
 export const qqNewsAdapter: SiteAdapter = {
   id: 'qq-news',
   match: (url: string) => url.includes('news.qq.com') || url.includes('new.qq.com'),
-  siteName: '腾讯新闻',
+  siteName: 'Tencent News',
 
   removeSelectors: qqNewsSelectors,
 
   preprocess(doc: Document) {
-    // 智能处理 iframe：只删除明确的广告 iframe，保留可能的嵌入内容
+    // Smart iframe handling: only remove clearly-ad iframes, preserve potential embedded content
     const mainContent = doc.querySelector('article, main, [role="main"], .content-article');
     doc.querySelectorAll('iframe').forEach((iframe) => {
       const src = iframe.src || '';
-      // 已知广告域名列表
+      // Known ad domain list
       const adDomains = ['doubleclick', 'googlesyndication', 'taboola', 'outbrain',
                          'adservice', 'adsense', 'adnxs', 'pubmatic', 'criteo'];
       const isAdIframe = adDomains.some(domain => src.includes(domain)) ||
-                         (!src && !iframe.srcdoc); // 无 src 且无 srcdoc 的空 iframe
+                         (!src && !iframe.srcdoc); // Empty iframe without src or srcdoc
 
       if (mainContent) {
-        // 如果找到了正文区域，只删除正文外的 iframe 或明确的广告 iframe
+        // If main content area is found, only remove iframes outside it or clearly-ad iframes
         if (!mainContent.contains(iframe) || isAdIframe) {
           iframe.remove();
         }
       } else {
-        // 如果没找到正文区域，只删除明确的广告 iframe，保留其他 iframe
+        // If no main content area is found, only remove clearly-ad iframes, keep others
         if (isAdIframe) {
           iframe.remove();
         }

@@ -1,33 +1,33 @@
 /**
- * Reddit 适配器
+ * Reddit Adapter
  *
- * ⚠️ extractRedditContent() 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ extractRedditContent() migrated from extractor.unlisted.ts as-is, no logic changes
  */
 import type { SiteAdapter } from '../../types';
 import { isPlaceholderSrc } from '@/utils/lazy-image';
 
 /**
- * 专门为 Reddit 提取内容
- * 支持新版 Shreddit（Shadow DOM）和旧版 Reddit
+ * Extract content specifically for Reddit
+ * Supports new Shreddit (Shadow DOM) and legacy Reddit
  *
- * @param doc 工作文档（克隆后的，用于 DOM 变更和旧版 Reddit）
- * @param _url 页面 URL（未使用）
- * @param sourceDoc 原始文档（用于 Shadow DOM 读取，cloneNode 无法复制 shadowRoot）
+ * @param doc Working document (cloned, for DOM manipulation and legacy Reddit)
+ * @param _url Page URL (unused)
+ * @param sourceDoc Original document (for Shadow DOM access, cloneNode cannot copy shadowRoot)
  */
 function extractRedditContent(
   doc: Document,
   _url: string,
   sourceDoc?: Document
 ): { title: string; content: string } | null {
-  // Reddit DOM 结构复杂，Readability 经常失败，需要手动提取
+  // Reddit DOM structure is complex, Readability often fails, need manual extraction
 
-  // 尝试从原始文档的 Shadow DOM 读取（新版 Shreddit UI）
-  // cloneNode(true) 不会复制 Shadow DOM，所以必须用 sourceDoc
+  // Attempt to read from the original document's Shadow DOM (new Shreddit UI)
+  // cloneNode(true) does not copy Shadow DOM, so must use sourceDoc
   const liveDoc = sourceDoc || doc;
   const shredditPost = liveDoc.querySelector('shreddit-post') as HTMLElement | null;
   const shadowRoot = shredditPost?.shadowRoot;
 
-  // 提取标题（多选择器降级）
+  // Extract title (multi-selector fallback)
   let title: string | undefined;
   if (shadowRoot) {
     title = shadowRoot.querySelector('[slot="title"]')?.textContent?.trim();
@@ -40,13 +40,13 @@ function extractRedditContent(
       liveDoc.title || doc.title;
   }
 
-  // 构建内容容器
+  // Build content container
   const contentContainer = doc.createElement('div');
 
-  // 1. 提取媒体内容（图片/视频）
+  // 1. Extract media content (images/videos)
   let mediaEl: Element | null = null;
 
-  // 新版 Shreddit UI 的媒体容器
+  // New Shreddit UI media container
   if (shadowRoot) {
     mediaEl = shadowRoot.querySelector('[slot="post-media-container"]');
   }
@@ -59,10 +59,10 @@ function extractRedditContent(
   }
 
   if (mediaEl) {
-    // 提取图片
+    // Extract images
     const images = mediaEl.querySelectorAll('img');
     images.forEach((img) => {
-      // 获取最佳图片 URL（优先 src，然后各种 data-* 属性）
+      // Get best image URL (prefer src, then various data-* attributes)
       let imgSrc = img.getAttribute('src') || '';
 
       if (isPlaceholderSrc(imgSrc)) {
@@ -81,10 +81,10 @@ function extractRedditContent(
       }
     });
 
-    // 提取画廊中的图片（shreddit-gallery）
+    // Extract gallery images (shreddit-gallery)
     const gallery = mediaEl.querySelector('shreddit-gallery, [data-testid="gallery"]');
     if (gallery) {
-      // 画廊可能有多个图片 URL 存储在 data 属性中
+      // Gallery may have multiple image URLs stored in data attributes
       const galleryImages = gallery.querySelectorAll('img, [data-testid="media-element"]');
       galleryImages.forEach((img) => {
         const imgEl = img as HTMLImageElement;
@@ -100,24 +100,24 @@ function extractRedditContent(
     }
   }
 
-  // 2. 提取文本正文
+  // 2. Extract text body
   let postContentEl: Element | null = null;
 
-  // 优先从 Shadow DOM 读取（新版 Shreddit）
+  // Prefer reading from Shadow DOM (new Shreddit)
   if (shadowRoot) {
     postContentEl =
       shadowRoot.querySelector('[slot="text-body"]') ||
       shadowRoot.querySelector('[data-testid="post-content"]');
   }
 
-  // Light DOM 降级路径（旧版 Reddit 或 old.reddit.com）
+  // Light DOM fallback (legacy Reddit or old.reddit.com)
   if (!postContentEl) {
     postContentEl =
       liveDoc.querySelector('[slot="text-body"]') ||
       liveDoc.querySelector('[data-testid="post-container"] [data-testid="post-content"]') ||
       liveDoc.querySelector('.Post [data-click-id="text"]') ||
-      liveDoc.querySelector('.usertext-body') ||  // old.reddit
-      liveDoc.querySelector('.md');  // old.reddit markdown
+              liveDoc.querySelector('.usertext-body') ||  // old.reddit
+              liveDoc.querySelector('.md');  // old.reddit markdown content
   }
 
   if (postContentEl) {
@@ -125,7 +125,7 @@ function extractRedditContent(
     contentContainer.appendChild(contentClone);
   }
 
-  // 如果既没有媒体也没有文本内容，返回 null
+  // If neither media nor text content found, return null
   if (!contentContainer.innerHTML.trim()) {
     return null;
   }

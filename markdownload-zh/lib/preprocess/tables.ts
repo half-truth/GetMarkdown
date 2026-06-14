@@ -1,29 +1,29 @@
-/** 表格硬上限：超过此行/列/单元格数时跳过 rowspan 展开，只做基础清理 */
+/** Table hard limit: skip rowspan expansion when exceeding this number of rows/columns/cells, only do basic cleanup */
 const MAX_ROWS = 500;
 const MAX_COLS = 50;
 const MAX_CELLS = 10_000;
 
 /**
- * 通用表格预处理器
+ * Generic table preprocessor
  *
- * 处理策略：
- * 1. 移除所有干扰属性（table 及子元素）
- * 2. 移除 colgroup/col（Markdown 不需要）
- * 3. 展开 rowspan（复制内容到后续行，避免信息丢失）
- * 4. 移除 colspan（Markdown 不支持列合并）
- * 5. 清理单元格内的复杂嵌套结构
+ * Processing strategy:
+ * 1. Remove all interfering attributes (table and child elements)
+ * 2. Remove colgroup/col (not needed in Markdown)
+ * 3. Expand rowspan (copy content to subsequent rows to avoid information loss)
+ * 4. Remove colspan (Markdown does not support column merging)
+ * 5. Clean up complex nested structures inside cells
  *
- * 超大表格（超过硬上限）跳过 rowspan 展开，只做基础属性清理。
+ * Large tables (exceeding hard limit) skip rowspan expansion, only do basic attribute cleanup.
  */
 export function normalizeTables(doc: Document): void {
   doc.querySelectorAll('table').forEach((table) => {
-    // 1. 清理 table 元素自身的所有属性
+    // 1. Clean up all attributes on the table element itself
     Array.from(table.attributes).forEach((attr) => table.removeAttribute(attr.name));
 
-    // 2. 移除 colgroup/col（对 Markdown 无意义）
+    // 2. Remove colgroup/col (meaningless for Markdown)
     table.querySelectorAll('colgroup').forEach((el) => el.remove());
 
-    // 3. 清理所有子元素的属性（先保留 rowspan/colspan 用于展开）
+    // 3. Clean up attributes on all child elements (preserve rowspan/colspan for expansion)
     const allTableElements = table.querySelectorAll('thead, tbody, tfoot, tr, th, td');
     allTableElements.forEach((el) => {
       const rowspan = el.getAttribute('rowspan');
@@ -33,8 +33,8 @@ export function normalizeTables(doc: Document): void {
       if (colspan) el.setAttribute('colspan', colspan);
     });
 
-    // 4. 展开 rowspan（复制内容到后续行）
-    // 硬上限检查：超大表格跳过 rowspan 展开
+    // 4. Expand rowspan (copy content to subsequent rows)
+    // Hard limit check: skip rowspan expansion for large tables
     const rows = Array.from(table.rows);
     const firstRowCells = rows[0]?.cells.length || 0;
     const totalCells = rows.length * Math.max(firstRowCells, 1);

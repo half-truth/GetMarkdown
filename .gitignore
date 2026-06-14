@@ -20,3 +20,6 @@ markdownload-zh/tests/reports/
 
 # Synology conflict files
 *_Conflict.*
+
+# AtomCode local-scope configs (machine-specific)
+.atomcode/local/

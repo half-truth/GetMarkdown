@@ -1,27 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=400, initial-scale=1.0">
-  <title>MarkDownload</title>
+  <meta name="viewport" content="width=500, initial-scale=1.0">
+  <title>GetMarkdown</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <div id="app">
-    <!-- 加载状态 -->
+    <!-- Loading State -->
     <div id="loading" class="loading">
       <div class="spinner"></div>
-      <p>正在提取内容...</p>
+      <p>Extracting content...</p>
     </div>
 
-    <!-- 主界面 -->
+    <!-- Main Interface -->
     <div id="main" class="main hidden">
       <div class="header">
-        <input type="text" id="title" class="title-input" placeholder="文章标题" autofocus>
-        <div class="actions">
-          <button id="btn-copy" class="btn" title="复制到剪贴板">📋</button>
-          <button id="btn-download" class="btn btn-primary" title="下载">⬇️ 下载</button>
-        </div>
+        <input type="text" id="title" class="title-input" placeholder="Article Title" autofocus>
       </div>
 
       <div class="preview-container">
@@ -31,14 +27,18 @@
       <div class="status-bar">
         <span id="status"></span>
         <span id="word-count"></span>
+        <div class="status-right">
+          <button id="btn-copy" class="btn btn-pill btn-pill-copy" title="Copy to clipboard">📋 Copy</button>
+          <button id="btn-download" class="btn btn-pill btn-pill-download" title="Download Markdown">⬇️ Download</button>
+        </div>
       </div>
     </div>
 
-    <!-- 错误状态 -->
+    <!-- Error State -->
     <div id="error" class="error hidden">
-      <p>❌ 提取失败</p>
+      <p>❌ Extraction Failed</p>
       <p id="error-message"></p>
-      <button id="btn-retry" class="btn">重试</button>
+      <button id="btn-retry" class="btn">Retry</button>
     </div>
   </div>
 

@@ -1,71 +1,71 @@
 # CLAUDE.md
 
-> 🕐 最后更新: 2026-04-04
+> 🕐 Last updated: 2026-04-04
 
-## 项目概述
+## Project Overview
 
-MarkDownload 中文版：Chrome 扩展，将网页内容剪藏为 Markdown，专为 Obsidian 用户优化。
+GetMarkdown: A Chrome extension that saves web pages as clean Markdown.
 
-**技术栈**：WXT + TypeScript + Chrome MV3 + Readability.js + Turndown
-**权限模型**：`activeTab` + `scripting` + `downloads`，按需注入，无全站权限。
+**Tech Stack**: WXT + TypeScript + Chrome MV3 + Readability.js + Turndown
+**Permissions**: `activeTab` + `scripting` + `downloads`, injected on demand, no full-site access.
 
-## 常用命令
+## Common Commands
 
 ```bash
-npm run dev                    # 开发模式（热重载）
-npm run build                  # 生产构建 → .output/chrome-mv3/
-npm test                       # Vitest 单元测试
-npm run test:integration       # 集成测试
-npm run test:e2e               # E2E（Playwright 无头）
-ESLINT_USE_FLAT_CONFIG=false npx eslint lib/ --ext .ts  # Lint（项目用旧 .eslintrc.json）
+npm run dev                    # Watch mode (hot reload)
+npm run build                  # Production build → ../output/chrome-mv3/
+npm test                       # Vitest unit tests
+npm run test:integration       # Integration tests
+npm run test:e2e               # E2E (Playwright headless)
+ESLINT_USE_FLAT_CONFIG=false npx eslint lib/ --ext .ts  # Lint (project uses legacy .eslintrc.json)
 ```
 
-构建后同步产物：
+Post-build sync:
 ```bash
-cp .output/chrome-mv3/extractor.js ../markdownload-zh-extension/extractor.js
-cp .output/chrome-mv3/chunks/*.js ../markdownload-zh-extension/chunks/
-cp .output/chrome-mv3/popup.html ../markdownload-zh-extension/popup.html
+cp ../output/chrome-mv3/extractor.js ../markdownload-zh-extension/extractor.js
+cp ../output/chrome-mv3/chunks/*.js ../markdownload-zh-extension/chunks/
+cp ../output/chrome-mv3/popup.html ../markdownload-zh-extension/popup.html
 ```
 
-## 架构
+## Architecture
 
-### 数据流
+### Data Flow
 
 ```
 Popup init() → chrome.scripting.executeScript({ files: ['extractor.js'] })
     ↓
-extractor.unlisted.ts（活文档 + 克隆文档）→ runPipeline()
-    ├── Stage 1: preprocessDOM（懒加载、表格、视频）
-    ├── Stage 2: extractContent（Readability / customExtract）
-    ├── Stage 3: convertToMarkdown（Turndown + GFM）
-    └── Stage 4: formatMarkdown（零宽字符、空行压缩）
+extractor.unlisted.ts (live doc + cloned doc) → runPipeline()
+    ├── Stage 1: preprocessDOM (lazy images, tables, video)
+    ├── Stage 2: extractContent (Readability / customExtract)
+    ├── Stage 3: convertToMarkdown (Turndown + GFM)
+    └── Stage 4: formatMarkdown (zero-width chars, blank line compression)
     ↓
-结果存入 window.__markdownload_extracted → Popup 轮询（每 200ms，最多 30 秒）
+Result stored in window.__markdownload_extracted → Popup polls (every 200ms, max 30s)
     ↓
-下载：Content Script 注入（绕过 Chrono）→ chrome.downloads → <a download> 兜底
+Download: Content Script injection (bypass Chrono) → chrome.downloads → <a download> fallback
 ```
 
-### 核心模块
+### Core Modules
 
 ```
 lib/
-├── pipeline.ts          # 主管线
-├── types.ts             # SiteAdapter 接口（含 needsSourceDoc / customExtract）
+├── pipeline.ts          # Main orchestrator
+├── types.ts             # SiteAdapter interface (includes needsSourceDoc / customExtract)
 ├── preprocess/          # Stage 1
-├── sites/               # 12 个适配器文件，68 个站点
-│   ├── registry.ts      # URL 匹配：exactHost O(1) → suffix → regex
+├── sites/               # 12 adapter files, 68 sites
+│   ├── registry.ts      # URL matching: exactHost O(1) → suffix → regex
 │   └── adapters/
-│       ├── feishu.ts    # 飞书（虚拟滚动 + 表格逐行合并 + Canvas 图片）
-│       ├── wechat.ts    # 微信公众号
-│       ├── zhihu.ts     # 知乎
-│       ├── reddit.ts    # Reddit（Shadow DOM，needsSourceDoc）
-│       └── ...          # csdn / qq-news / tiktok-shop / chinese-tech(12站) / news / tech-blogs / generic-docs / _simple
-├── extract/             # Stage 2（Readability + fallback + customExtract）
-├── convert/             # Stage 3（Turndown + 自定义规则）
-└── format/              # Stage 4（清理）
+│       ├── feishu.ts    # Feishu Docs (virtual scroll + table row merge + Canvas images)
+│       ├── wechat.ts    # WeChat Official Accounts
+│       ├── zhihu.ts     # Zhihu
+│       ├── reddit.ts    # Reddit (Shadow DOM, needsSourceDoc)
+│       └── ...          # csdn / qq-news / tiktok-shop / chinese-tech(12 sites) / news / tech-blogs / generic-docs / _simple
+├── extract/             # Stage 2 (Readability + fallback + customExtract)
+├── convert/             # Stage 3 (Turndown + custom rules)
+└── format/              # Stage 4 (cleanup)
 ```
 
-## SiteAdapter 接口
+## SiteAdapter Interface
 
 ```typescript
 interface SiteAdapter {
@@ -74,42 +74,42 @@ interface SiteAdapter {
   removeSelectors?: string[];
   preprocess?: (doc: Document, url: string) => void;
   fallbackSelectors?: string[];
-  needsSourceDoc?: boolean;           // true → customExtract 收到活文档（非克隆）
+  needsSourceDoc?: boolean;           // true → customExtract receives live doc (not clone)
   customExtract?: (doc, url, sourceDoc?) => Promise<{ title, content } | null>;
   siteName?: string;
 }
 ```
 
-`needsSourceDoc` 场景：虚拟滚动（飞书）、Shadow DOM（Reddit）。
+`needsSourceDoc` scenario: virtual scroll (Feishu), Shadow DOM (Reddit).
 
-## 飞书适配器（feishu.ts）
+## Feishu Adapter (feishu.ts)
 
-最复杂的适配器，基于 429 链接 5 种页面类型实测。
+Most complex adapter, tested against 429 links across 5 page types.
 
-**覆盖范围**：docx ✓ / file ✓（302→docx）/ sheets △ / slides ✗ / base ✗（Canvas）
+**Coverage**: docx ✓ / file ✓ (302→docx) / sheets △ / slides ✗ / base ✗ (Canvas)
 
-**核心机制**：
-- **虚拟滚动**：自适应滚动 `#docx > div`，有新内容等 300ms，空区域 200ms，连续 5 步无新内容 = 到底，硬性上限 25 秒
-- **表格**：`<tr data-index>` 逐行收集跨滚动位置合并（scrollHeight 动态增长 7000→9500+）
-- **图片**：80% blob: URL → Canvas 转 `data:image/jpeg`（0.6 质量 + 限宽 800px），100% 成功率
-- **标题**：从 `page` block 提取，`cleanZeroWidth()` 清理
-- **heading**：`heading` / `heading1` / `heading2`... 全覆盖，优先 class 匹配
-- **防护**：每步 `isDocxPage()` 检测，防知识库 SPA 跳转；slides block type 防御性跳过
+**Core Mechanics**:
+- **Virtual Scroll**: auto-scroll `#docx > div`, wait 300ms for new content, 200ms on empty area, 5 consecutive empty steps = end, hard ceiling 25s
+- **Tables**: `<tr data-index>` row-by-row collection merged across scroll positions (scrollHeight grows dynamically 7000→9500+)
+- **Images**: 80% blob: URL → Canvas to `data:image/jpeg` (0.6 quality, max width 800px), 100% success rate
+- **Title**: extracted from `page` block, cleaned via `cleanZeroWidth()`
+- **Headings**: `heading` / `heading1` / `heading2`... full coverage, class-based matching preferred
+- **Guard**: `isDocxPage()` check on every step to prevent knowledge-base SPA redirects; defensive skip for slides block type
 
-## 已知陷阱
+## Known Gotchas
 
-| 陷阱 | 规避 |
-|------|------|
-| Blob URL 过早释放 | 仅在 `downloads.onChanged` complete/interrupted 后释放 |
-| 注入脚本等待不可靠 | 轮询 + 事件驱动双模式 |
-| 懒加载图片相对路径丢失 | `new URL(value, location.href)` 归一化 |
-| 飞书表格只采集初始行 | `data-index` 逐行收集，跨滚动合并 |
-| 飞书 scrollHeight 动态增长 | 每步读 `scrollContainer.scrollHeight` 更新上界 |
-| 飞书图片 blob: URL 不可外部访问 | Canvas → data:image/jpeg 内嵌 |
-| 飞书标题零宽字符 | `cleanZeroWidth()` 正则清理 |
-| ESLint 9 不兼容旧配置 | 需 `ESLINT_USE_FLAT_CONFIG=false` |
+| Gotcha | Mitigation |
+|--------|-----------|
+| Blob URL released too early | Only release after `downloads.onChanged` complete/interrupted |
+| Injection script wait unreliable | Dual polling + event-driven mode |
+| Lazy image relative path loss | `new URL(value, location.href)` normalization |
+| Feishu table captures initial rows only | `data-index` row-by-row collection merged across scrolls |
+| Feishu scrollHeight grows dynamically | Update upper bound every step via `scrollContainer.scrollHeight` |
+| Feishu blob: URLs inaccessible externally | Canvas → data:image/jpeg inline |
+| Feishu title zero-width chars | `cleanZeroWidth()` regex cleanup |
+| ESLint 9 incompatible with old config | Requires `ESLINT_USE_FLAT_CONFIG=false` |
 
-## 构建产物
+## Build Output
 
-`extractor.js`（~89KB）= Readability.js + Turndown + 全部适配器。输出到 `.output/chrome-mv3/`。
-预构建版本在 `../markdownload-zh-extension/`，构建后需手动同步。
+`extractor.js` (~89KB) = Readability.js + Turndown + all adapters. Output to `../output/chrome-mv3/`.
+Pre-built version in `../markdownload-zh-extension/`; manual sync needed after build.

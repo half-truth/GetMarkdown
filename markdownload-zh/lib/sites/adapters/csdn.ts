@@ -1,7 +1,7 @@
 /**
- * CSDN 适配器
+ * CSDN adapter
  *
- * ⚠️ 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ Migrated as-is from extractor.unlisted.ts, no logic changes
  */
 import type { SiteAdapter } from '../../types';
 
@@ -23,7 +23,7 @@ export const csdnAdapter: SiteAdapter = {
   ],
 
   preprocess(doc: Document) {
-    // 代码块清理：提取纯文本内容
+    // Clean code blocks: extract plain text content
     doc.querySelectorAll('pre code').forEach((code) => {
       const textContent = code.textContent || '';
       code.textContent = textContent;

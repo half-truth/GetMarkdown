@@ -1,13 +1,13 @@
 /**
- * 站点适配器入口
+ * Site adapter entry point
  *
- * 导入所有适配器模块（触发注册），然后导出 getSiteAdapter
+ * Import all adapter modules (trigger registration), then export getSiteAdapter
  */
 import { registerAdapter, registerAdapters, getSiteAdapter as _getSiteAdapter } from './registry';
 import { detectDocFramework } from './adapters/generic-docs';
 import type { SiteAdapter } from '../types';
 
-// 导入适配器
+// Import adapters
 import { wechatAdapter } from './adapters/wechat';
 import { redditAdapter } from './adapters/reddit';
 import { discourseAdapter } from './adapters/discourse';
@@ -23,10 +23,10 @@ import { techBlogAdapters } from './adapters/tech-blogs';
 import { genericDocsAdapters } from './adapters/generic-docs';
 import { simpleAdapters } from './adapters/_simple';
 
-// 注册所有适配器
-// 注册顺序决定匹配优先级：更具体的在前
+// Register all adapters
+// Registration order determines matching priority: more specific first
 
-// 1. 复杂站点（有自定义逻辑）
+// 1. Complex sites (with custom logic)
 registerAdapter(wechatAdapter);
 registerAdapter(redditAdapter);
 registerAdapter(discourseAdapter);
@@ -37,32 +37,32 @@ registerAdapter(zhihuAdapter);
 registerAdapter(feishuAdapter);
 registerAdapters(aiSiteAdapters);
 
-// 2. 中文技术社区
+// 2. Chinese tech communities
 registerAdapters(chineseTechAdapters);
 
-// 3. 新闻站点
+// 3. News sites
 registerAdapters(newsAdapters);
 
-// 4. 技术博客
+// 4. Tech blogs
 registerAdapters(techBlogAdapters);
 
-// 5. 文档框架
+// 5. Documentation frameworks
 registerAdapters(genericDocsAdapters);
 
-// 6. 简单站点
+// 6. Simple sites
 registerAdapters(simpleAdapters);
 
 /**
- * 获取站点适配器
+ * Get site adapter
  *
- * 先通过 URL 匹配，如果没有命中，再尝试 DOM 检测文档框架
+ * First try URL matching, if no match, try DOM-based document framework detection
  */
 export function getSiteAdapter(url: string, doc?: Document): SiteAdapter | null {
-  // URL 匹配
+  // URL matching
   const adapter = _getSiteAdapter(url);
   if (adapter) return adapter;
 
-  // DOM 检测文档框架
+  // DOM-based document framework detection
   if (doc) {
     return detectDocFramework(doc);
   }

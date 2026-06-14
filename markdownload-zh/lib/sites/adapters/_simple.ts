@@ -1,7 +1,7 @@
 /**
- * 简单站点适配器（知识/文档平台）
+ * Simple site adapter (knowledge/documentation platforms)
  *
- * 原样搬迁自 extractor.unlisted.ts 的选择器配置
+ * Ported as-is from extractor.unlisted.ts selector configuration
  */
 import type { SiteAdapter } from '../../types';
 import { createSimpleAdapter } from '../helpers';
@@ -76,7 +76,7 @@ export const notionAdapter = createSimpleAdapter({
 });
 
 /**
- * 所有简单站点适配器
+ * All simple site adapters
  */
 export const simpleAdapters: SiteAdapter[] = [
   wikipediaAdapter, mdnAdapter, w3schoolsAdapter,

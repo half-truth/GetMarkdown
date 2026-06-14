@@ -1,13 +1,13 @@
 /**
- * DOM 操作工具函数
+ * DOM utility functions
  *
- * 从 extractor.unlisted.ts 原样迁移:
+ * Migrated as-is from extractor.unlisted.ts:
  * - safeQuerySelectorAll()
  * - safeRemoveElements()
  */
 
 /**
- * 安全地执行 querySelectorAll，处理不支持的选择器（如 :has()）
+ * Safely execute querySelectorAll, handling unsupported selectors (e.g. :has())
  */
 export function safeQuerySelectorAll(doc: Document, selectors: string[]): Element[] {
   const elements: Element[] = [];
@@ -15,7 +15,7 @@ export function safeQuerySelectorAll(doc: Document, selectors: string[]): Elemen
     try {
       doc.querySelectorAll(selector).forEach((el) => elements.push(el));
     } catch {
-      // 选择器不支持（如某些浏览器不支持 :has()），静默跳过
+      // Selector not supported (e.g. some browsers don't support :has()), silently skip
       console.debug(`[Markdownload] Unsupported selector skipped: ${selector}`);
     }
   }
@@ -23,7 +23,7 @@ export function safeQuerySelectorAll(doc: Document, selectors: string[]): Elemen
 }
 
 /**
- * 安全地移除元素，使用 safeQuerySelectorAll 处理可能不支持的选择器
+ * Safely remove elements, using safeQuerySelectorAll to handle potentially unsupported selectors
  */
 export function safeRemoveElements(doc: Document, selectors: string[]): void {
   safeQuerySelectorAll(doc, selectors).forEach((el) => el.remove());

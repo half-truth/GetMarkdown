@@ -1,21 +1,21 @@
 /**
- * Pipeline + Site Adapter 内部类型
+ * Pipeline + Site Adapter internal types
  */
 
 /**
- * 站点适配器接口
+ * Site adapter interface
  */
 export interface SiteAdapter {
   id: string;
   match: string | RegExp | ((url: string) => boolean);
 
-  // Stage 1: 预处理
+  // Stage 1: Preprocess
   removeSelectors?: string[];
   preprocess?: (doc: Document, url: string) => Promise<void> | void;
 
-  // Stage 2: 提取
+  // Stage 2: Extract
   fallbackSelectors?: string[];
-  /** 是否需要访问原始文档（用于 Shadow DOM 读取） */
+  /** Whether the original document is needed (for Shadow DOM reading) */
   needsSourceDoc?: boolean;
   customExtract?: (
     doc: Document,
@@ -30,7 +30,7 @@ export interface SiteAdapter {
 }
 
 /**
- * Pipeline 输出结果
+ * Pipeline output result
  */
 export interface PipelineResult {
   success: boolean;

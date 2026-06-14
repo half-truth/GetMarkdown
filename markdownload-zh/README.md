@@ -1,41 +1,41 @@
-# MarkDownload 中文版
+# GetMarkdown
 
-将网页内容剪藏为 Markdown 文件，专为 Obsidian 用户优化。
+Save web pages as clean Markdown.
 
-## 特性
+## Features
 
-- 🎯 一键提取网页正文
-- 📝 实时 Markdown 预览
-- 📋 复制到剪贴板
-- 🇨🇳 中文优化（微信公众号、知乎等）
-- 📋 符合 Obsidian Vault 规范的 Frontmatter
-- 🔒 仅 activeTab 权限，无需全站权限
+- 🎯 One-click article extraction
+- 📝 Real-time Markdown preview
+- 📋 Copy to clipboard
+- 🌐 Optimized for Chinese sites (WeChat, Zhihu, etc.)
+- 📋 Obsidian Vault-compatible Frontmatter
+- 🔒 `activeTab` permission only — no full-site access required
 
-## 隐私声明
+## Privacy
 
-**本扩展完全本地处理，不收集任何用户数据，不发送网络请求。**
+**This extension processes everything locally. No data is collected, and no network requests are sent.**
 
-## 安装
+## Installation
 
-### 开发版本
+### Development Build
 
-1. 克隆仓库
+1. Clone the repository
 2. `npm install`
 3. `npm run build`
-4. 在 Chrome 加载 `.output/chrome-mv3/`
+4. Load `../output/chrome-mv3/` in Chrome via "Load unpacked"
 
-## 使用
+## Usage
 
-1. 打开任意网页
-2. 点击扩展图标
-3. 预览/编辑标题
-4. 点击下载或复制
+1. Open any web page
+2. Click the extension icon
+3. Preview/edit the title
+4. Download or copy
 
-## Frontmatter 格式
+## Frontmatter Format
 
 ```yaml
 ---
-title: "文章标题"
+title: "Article Title"
 id: 20260124-a3f9
 created: 2026-01-24
 updated: 2026-01-24
@@ -43,28 +43,28 @@ captured: 2026-01-24 17:30:00
 status: draft
 category: resource
 tags:
-  - 收藏
+  - bookmark
 source: https://example.com/article
 site: example.com
 ---
 ```
 
-## 开发
+## Development
 
 ```bash
-npm run dev     # 开发模式
-npm run build   # 构建
-npm test        # 测试
-npm run lint    # 代码检查
+npm run dev     # Watch mode with hot reload
+npm run build   # Production build
+npm test        # Run tests
+npm run lint    # Lint code
 ```
 
-## 技术栈
+## Tech Stack
 
-- WXT 框架
+- WXT Framework
 - TypeScript
 - Chrome Extension MV3
 - activeTab + Scripting API
 
-## 许可
+## License
 
 MIT

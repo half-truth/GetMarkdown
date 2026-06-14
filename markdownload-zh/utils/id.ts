@@ -1,5 +1,5 @@
 /**
- * 提取日期各部分（内部共享）
+ * Extract date parts (internally shared)
  */
 function getDateParts(date: Date): { year: number; month: string; day: string } {
   return {
@@ -10,7 +10,7 @@ function getDateParts(date: Date): { year: number; month: string; day: string } 
 }
 
 /**
- * 生成唯一 ID，格式：YYYYMMDD-xxxx
+ * Generate unique ID, format: YYYYMMDD-xxxx
  */
 export function generateId(date: Date = new Date()): string {
   const { year, month, day } = getDateParts(date);
@@ -19,7 +19,7 @@ export function generateId(date: Date = new Date()): string {
 }
 
 /**
- * 格式化日期为 YYYY-MM-DD（本地时区）
+ * Format date as YYYY-MM-DD (local timezone)
  */
 export function formatDate(date: Date = new Date()): string {
   const { year, month, day } = getDateParts(date);
@@ -27,7 +27,7 @@ export function formatDate(date: Date = new Date()): string {
 }
 
 /**
- * 格式化日期时间为 YYYY-MM-DD HH:mm:ss（用于 capturedAt）
+ * Format date-time as YYYY-MM-DD HH:mm:ss (for capturedAt)
  */
 export function formatDateTime(date: Date = new Date()): string {
   const datePart = formatDate(date);

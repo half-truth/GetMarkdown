@@ -1,20 +1,20 @@
 /**
- * 新闻站点适配器集合
+ * News site adapters collection
  *
- * 原样搬迁自 extractor.unlisted.ts 的选择器配置
- * 使用 createNewsAdapter 工厂函数共享基础选择器
+ * Selector configuration ported from extractor.unlisted.ts
+ * Shared base selectors using createNewsAdapter factory function
  */
 import type { SiteAdapter } from '../../types';
 import { createNewsAdapter } from '../helpers';
 
 // ========================================
-// 中文新闻/内容平台
+// Chinese news/content platforms
 // ========================================
 
 export const doubanAdapter = createNewsAdapter({
   id: 'douban',
   match: 'douban.com',
-  siteName: '豆瓣',
+  siteName: 'Douban',
   removeSelectors: [
     '.aside', '#comments-section', '.recommendations',
     '.sns-bar', '.note-author', '.note-like',
@@ -25,7 +25,7 @@ export const doubanAdapter = createNewsAdapter({
 export const sspaiAdapter = createNewsAdapter({
   id: 'sspai',
   match: 'sspai.com',
-  siteName: '少数派',
+  siteName: 'Sspai',
   removeSelectors: [
     '.comment-section', '.related-articles',
     '.author-box', '.share-buttons', '.membership',
@@ -36,7 +36,7 @@ export const sspaiAdapter = createNewsAdapter({
 export const kr36Adapter = createNewsAdapter({
   id: '36kr',
   match: '36kr.com',
-  siteName: '36氪',
+  siteName: '36kr',
   removeSelectors: [
     '.article-bottom-module', '.comment-area',
     '.recommend-flow', '.author-widget', '.share-box',
@@ -48,7 +48,7 @@ export const kr36Adapter = createNewsAdapter({
 export const huxiuAdapter = createNewsAdapter({
   id: 'huxiu',
   match: 'huxiu.com',
-  siteName: '虎嗅',
+  siteName: 'Huxiu',
   removeSelectors: [
     '.article-sidebar', '.comment-wrapper', '.related-article',
     '.author-info', '.share-module', '.ad-wrapper',
@@ -59,7 +59,7 @@ export const huxiuAdapter = createNewsAdapter({
 export const tmtpostAdapter = createNewsAdapter({
   id: 'tmtpost',
   match: 'tmtpost.com',
-  siteName: '钛媒体',
+  siteName: 'TMT Post',
   removeSelectors: [
     '.post-sidebar', '.comment-box', '.recommend-posts',
     '.author-box', '.share-box', '.ad-box',
@@ -70,7 +70,7 @@ export const tmtpostAdapter = createNewsAdapter({
 export const ifanrAdapter = createNewsAdapter({
   id: 'ifanr',
   match: 'ifanr.com',
-  siteName: '爱范儿',
+  siteName: 'iFanr',
   removeSelectors: [
     '.comment-section', '.related-posts',
     '.author-info', '.share-buttons', '.ad-container',
@@ -81,7 +81,7 @@ export const ifanrAdapter = createNewsAdapter({
 export const toutiaoAdapter = createNewsAdapter({
   id: 'toutiao',
   match: 'toutiao.com',
-  siteName: '今日头条',
+  siteName: 'Toutiao',
   removeSelectors: [
     '.comment-container', '.related-article',
     '.author-info', '.share-module',
@@ -93,7 +93,7 @@ export const toutiaoAdapter = createNewsAdapter({
 export const baijiahaoAdapter = createNewsAdapter({
   id: 'baijiahao',
   match: 'baijiahao.baidu.com',
-  siteName: '百度百家号',
+  siteName: 'Baidu Baijiahao',
   removeSelectors: [
     '.aside', '.comment-module', '.recommend-container',
     '.author-info', '.share-module', '.ad-container',
@@ -104,7 +104,7 @@ export const baijiahaoAdapter = createNewsAdapter({
 export const neteaseAdapter = createNewsAdapter({
   id: 'netease',
   match: '163.com',
-  siteName: '网易',
+  siteName: 'NetEase',
   removeSelectors: [
     '.side', '.comment_area', '.related_news',
     '.author_box', '.share_box',
@@ -118,7 +118,7 @@ export const neteaseAdapter = createNewsAdapter({
 export const sinaAdapter = createNewsAdapter({
   id: 'sina',
   match: (url: string) => url.includes('sina.com.cn') || url.includes('weibo.com'),
-  siteName: '新浪',
+  siteName: 'Sina',
   removeSelectors: [
     '.side', '#commentModule', '.recommend_wrap',
     '.article-info', '.share-wrap',
@@ -129,7 +129,7 @@ export const sinaAdapter = createNewsAdapter({
 export const ifengAdapter = createNewsAdapter({
   id: 'ifeng',
   match: 'ifeng.com',
-  siteName: '凤凰网',
+  siteName: 'Ifeng',
   removeSelectors: [
     '.aside', '.comment_box', '.relate_news',
     '.author_info', '.share_box', '.ad_container',
@@ -140,7 +140,7 @@ export const ifengAdapter = createNewsAdapter({
 export const thepaperAdapter = createNewsAdapter({
   id: 'thepaper',
   match: 'thepaper.cn',
-  siteName: '澎湃新闻',
+  siteName: 'The Paper',
   removeSelectors: [
     '.aside', '.comment_container', '.relate_box',
     '.author_box', '.share_box', '.ad_box',
@@ -151,7 +151,7 @@ export const thepaperAdapter = createNewsAdapter({
 export const sohuAdapter = createNewsAdapter({
   id: 'sohu',
   match: 'sohu.com',
-  siteName: '搜狐',
+  siteName: 'Sohu',
   removeSelectors: [
     '.right-side', '#commentModule', '.relate-news',
     '.article-info-wrap', '.share-wrap',
@@ -170,7 +170,7 @@ export const msnAdapter = createNewsAdapter({
 });
 
 // ========================================
-// 国际新闻媒体
+// International news media
 // ========================================
 
 export const bbcAdapter: SiteAdapter = {
@@ -184,7 +184,7 @@ export const bbcAdapter: SiteAdapter = {
     'nav:not([aria-label*="Breadcrumb"])',
   ],
   preprocess(doc: Document) {
-    // 智能处理 aside：只删除正文外的 aside，保留正文内的内容框
+    // Smart aside handling: only remove aside outside main content, keep content boxes inside article
     const bbcMainContent = doc.querySelector('article, main, [role="main"]');
     doc.querySelectorAll('aside, [role="complementary"]').forEach((el) => {
       if (!bbcMainContent?.contains(el)) {
@@ -322,15 +322,15 @@ export const forbesAdapter = createNewsAdapter({
 });
 
 /**
- * 所有新闻站点适配器
+ * All news site adapters
  */
 export const newsAdapters: SiteAdapter[] = [
-  // 中文
+  // Chinese
   doubanAdapter, sspaiAdapter, kr36Adapter, huxiuAdapter,
   tmtpostAdapter, ifanrAdapter, toutiaoAdapter, baijiahaoAdapter,
   neteaseAdapter, sinaAdapter, ifengAdapter, thepaperAdapter,
   sohuAdapter, msnAdapter,
-  // 国际
+  // International
   bbcAdapter, cnnAdapter, vergeAdapter, techcrunchAdapter,
   arsAdapter, wiredAdapter, guardianAdapter, nytAdapter,
   wapoAdapter, reutersAdapter, bloombergAdapter, forbesAdapter,

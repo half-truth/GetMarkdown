@@ -1,16 +1,16 @@
 /**
- * Readability 封装 + 超时保护
+ * Readability wrapper + timeout protection
  */
 import { Readability } from '@mozilla/readability';
 
-/** 超过此节点数跳过 Readability，直接走后备提取器 */
+/** Skip Readability beyond this node count, use fallback extractor directly */
 const MAX_NODE_COUNT = 50_000;
 
-/** 解析前移除的无用标签（减少 Readability 工作量） */
+/** Useless tags removed before parsing (reduces Readability workload) */
 const STRIP_TAGS = ['script', 'style', 'noscript', 'link[rel="stylesheet"]', 'svg'];
 
 /**
- * 精简 DOM：移除对 Readability 无用的节点，降低解析耗时
+ * Trim DOM: remove nodes useless to Readability, reduce parsing time
  */
 function trimDOM(doc: Document): void {
   const selector = STRIP_TAGS.join(', ');
@@ -18,23 +18,23 @@ function trimDOM(doc: Document): void {
 }
 
 /**
- * 使用 Readability 提取正文
+ * Extract content using Readability
  *
- * - 解析前移除 script/style 等无用标签
- * - 节点数超过阈值时直接返回 null（由调用方走后备提取器）
- * - 包含 performance.now() 计时预警
+ * - Remove useless tags like script/style before parsing
+ * - Return null directly when node count exceeds threshold (caller uses fallback extractor)
+ * - Includes performance.now() timing warning
  */
 export function readabilityExtract(
   doc: Document
 ): { title: string; content: string; siteName: string } | null {
-  // 精简 DOM（减少 Readability 处理量）
+  // Trim DOM (reduce Readability processing load)
   trimDOM(doc);
 
-  // 节点数阈值检查
+  // Node count threshold check
   const nodeCount = doc.getElementsByTagName('*').length;
   if (nodeCount > MAX_NODE_COUNT) {
     console.warn(
-      `[Markdownload] DOM 节点数 ${nodeCount} 超过阈值 ${MAX_NODE_COUNT}，跳过 Readability`
+      `[Markdownload] DOM node count ${nodeCount} exceeds threshold ${MAX_NODE_COUNT}, skipping Readability`
     );
     return null;
   }

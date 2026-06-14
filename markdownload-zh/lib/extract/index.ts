@@ -1,17 +1,17 @@
 /**
- * Stage 2: 内容提取
+ * Stage 2: Content Extraction
  */
 import type { SiteAdapter } from '../types';
 import { readabilityExtract } from './readability';
 import { getFallbackContent, getSiteName } from './fallback';
 
 /**
- * 提取内容（Stage 2）
+ * Extract content (Stage 2)
  *
- * 优先级：
- * 1. 适配器自定义提取 (customExtract)
+ * Priority:
+ * 1. Adapter custom extraction (customExtract)
  * 2. Readability
- * 3. 后备提取器
+ * 3. Fallback extractor
  */
 export async function extractContent(
   doc: Document,
@@ -19,10 +19,10 @@ export async function extractContent(
   adapter: SiteAdapter | null,
   sourceDoc?: Document
 ): Promise<{ title: string; html: string; siteName?: string } | null> {
-  // 1. 适配器自定义提取
+  // 1. Adapter custom extraction
   if (adapter?.customExtract) {
     try {
-      // 需要 Shadow DOM 访问的适配器传入原始文档
+      // Pass the original document to adapters that need Shadow DOM access
       const docForExtract = adapter.needsSourceDoc ? sourceDoc : undefined;
       const result = await adapter.customExtract(doc, url, docForExtract);
       if (result) {
@@ -47,7 +47,7 @@ export async function extractContent(
     };
   }
 
-  // 3. 后备提取器
+  // 3. Fallback extractor
   const fallback = getFallbackContent(doc, url, adapter);
   if (fallback) {
     return fallback;

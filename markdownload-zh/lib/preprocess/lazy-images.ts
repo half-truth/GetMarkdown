@@ -1,32 +1,32 @@
 /**
- * 通用懒加载图片预处理
+ * Universal lazy image preprocessor
  *
- * 从 extractor.unlisted.ts preprocessLazyImages() 原样迁移
+ * Migrated as-is from extractor.unlisted.ts preprocessLazyImages()
  */
 import { LAZY_IMAGE_ATTRS, normalizeImageUrl, isPlaceholderSrc, extractFirstFromSrcset } from '@/utils/lazy-image';
 
 /**
- * 预计算懒加载属性选择器（性能优化：避免运行时构建）
+ * Pre-computed lazy attribute selector (perf: avoid runtime construction)
  */
 const LAZY_ATTR_SELECTOR = LAZY_IMAGE_ATTRS.map(attr => `img[${attr}]`).join(',');
 
 /**
- * 通用懒加载图片预处理
+ * Universal lazy image preprocessing
  *
- * 性能优化：使用 CSS 选择器预先筛选有懒加载属性的图片，
- * 避免遍历所有图片并逐一检查属性。
+ * Perf: use CSS selector to pre-filter images with lazy attributes,
+ * avoids iterating all images and checking each attribute individually.
  */
 export function preprocessLazyImages(doc: Document, baseUrl: string): void {
   const processedImages = new Set<Element>();
 
   /**
-   * 处理单个懒加载图片
+   * Process a single lazy image
    */
   const processImage = (img: Element): void => {
     if (processedImages.has(img)) return;
     processedImages.add(img);
 
-    // 尝试从各种 data-* 属性获取真实图片 URL
+    // Try to get real image URL from various data-* attributes
     for (const attr of LAZY_IMAGE_ATTRS) {
       const value = img.getAttribute(attr);
       const normalizedUrl = normalizeImageUrl(value || '', baseUrl);
@@ -36,7 +36,7 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
       }
     }
 
-    // 处理 srcset（如果上面没找到有效 URL）
+    // Process srcset (if no valid URL found above)
     const srcset = img.getAttribute('data-srcset') || img.getAttribute('srcset');
     if (srcset && isPlaceholderSrc(img.getAttribute('src'))) {
       const firstUrl = extractFirstFromSrcset(srcset);
@@ -47,10 +47,10 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     }
   };
 
-  // 优化 1: 使用 CSS 选择器一次性筛选有懒加载属性的图片（O(1) 查询）
+  // Optimization 1: use CSS selector to filter lazy-load images (O(1) query)
   doc.querySelectorAll(LAZY_ATTR_SELECTOR).forEach(processImage);
 
-  // 优化 2: 只检查剩余的占位符 src 图片（通常很少）
+  // Optimization 2: only check remaining placeholder src images (usually few)
   doc.querySelectorAll('img').forEach((img) => {
     if (processedImages.has(img)) return;
     const currentSrc = img.getAttribute('src');
@@ -59,7 +59,7 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     }
   });
 
-  // 处理 picture/source 元素
+  // Handle picture/source elements
   doc.querySelectorAll('picture').forEach((picture) => {
     const img = picture.querySelector('img');
     if (!img) return;
@@ -77,12 +77,12 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     }
   });
 
-  // 处理 noscript 中的图片（某些站点在 noscript 中放置真实图片）
+  // Handle images in noscript (some sites place real images in noscript)
   doc.querySelectorAll('noscript').forEach((noscript) => {
     const content = noscript.textContent || '';
     if (!content.includes('<img')) return;
 
-    // 使用 DOMParser 安全解析 HTML
+    // Use DOMParser to safely parse HTML
     const parser = new DOMParser();
     const tempDoc = parser.parseFromString(content, 'text/html');
     const realImg = tempDoc.querySelector('img');
@@ -91,21 +91,21 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
     const realSrc = realImg.getAttribute('src');
     if (!realSrc) return;
 
-    // 策略 1: 前一个兄弟是 IMG
+    // Strategy 1: previous sibling is IMG
     const prevSibling = noscript.previousElementSibling;
     if (prevSibling?.tagName === 'IMG' && isPlaceholderSrc(prevSibling.getAttribute('src'))) {
       prevSibling.setAttribute('src', realSrc);
       return;
     }
 
-    // 策略 2: 后一个兄弟是 IMG
+    // Strategy 2: next sibling is IMG
     const nextSibling = noscript.nextElementSibling;
     if (nextSibling?.tagName === 'IMG' && isPlaceholderSrc(nextSibling.getAttribute('src'))) {
       nextSibling.setAttribute('src', realSrc);
       return;
     }
 
-    // 策略 3: 父元素内有占位 IMG（常见于 lazy-load wrapper）
+    // Strategy 3: parent has placeholder IMG (common in lazy-load wrappers)
     const parent = noscript.parentElement;
     if (parent) {
       const siblingImg = parent.querySelector('img');
@@ -115,7 +115,7 @@ export function preprocessLazyImages(doc: Document, baseUrl: string): void {
       }
     }
 
-    // 策略 4: 无对应 IMG，创建新 IMG 替换 noscript
+    // Strategy 4: no matching IMG, create new IMG to replace noscript
     const newImg = doc.createElement('img');
     newImg.setAttribute('src', realSrc);
     const alt = realImg.getAttribute('alt');

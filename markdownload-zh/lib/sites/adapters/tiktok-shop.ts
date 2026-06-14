@@ -1,7 +1,7 @@
 /**
- * TikTok Shop 适配器
+ * TikTok Shop adapter
  *
- * ⚠️ 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ Ported as-is from extractor.unlisted.ts, no logic changes
  */
 import type { SiteAdapter } from '../../types';
 import { mergeSplitLinks, normalizeTikTokTables, replaceTikTokImagePlaceholders } from '../../preprocess/links';

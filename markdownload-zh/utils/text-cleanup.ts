@@ -1,32 +1,32 @@
 /**
- * 文本清理工具
+ * Text cleanup utilities
  */
 
 /**
- * 零宽与不可见格式字符正则
- * 覆盖：软连字符 (U+00AD)、阿拉伯字母标记 (U+061C)、蒙古元音分隔符 (U+180E)、
- *       零宽空格族 (U+200B-200F)、行/段分隔符与双向控制 (U+2028-202F)、
- *       Word Joiner 及不可见操作符 (U+2060-206F)、BOM (U+FEFF)。
- * 飞书等富文本编辑器会污染文本（如 U+2029 段分隔符），需完整覆盖。
+ * Regex for zero-width and invisible format characters
+ * Covers: soft hyphen (U+00AD), Arabic letter mark (U+061C), Mongolian vowel separator (U+180E),
+ *         zero-width space family (U+200B-200F), line/paragraph separators & bidi controls (U+2028-202F),
+ *         Word Joiner and invisible operators (U+2060-206F), BOM (U+FEFF).
+ * Rich text editors like Feishu/Lark pollute text (e.g. U+2029 paragraph separator), so full coverage is needed.
  */
 // eslint-disable-next-line no-misleading-character-class
 const ZERO_WIDTH_CHARS =
   /[\u00AD\u061C\u180E\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
 /**
- * 移除零宽字符
+ * Remove zero-width characters
  */
 export function removeZeroWidthChars(text: string): string {
   return text.replace(ZERO_WIDTH_CHARS, '');
 }
 
 /**
- * 通用占位符 alt 文本（需要被替换的）
+ * Generic placeholder alt texts (to be replaced)
  */
 const PLACEHOLDER_ALTS = ['图片', 'image', 'img', 'photo', '图', ''];
 
 /**
- * 判断是否为占位符 alt
+ * Check if alt text is a placeholder
  */
 export function isPlaceholderAlt(alt: string | null): boolean {
   if (!alt) return true;

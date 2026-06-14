@@ -1,10 +1,10 @@
 /**
- * Stage 4: Markdown 后处理
+ * Stage 4: Markdown post-processing
  */
 import { cleanupMarkdown } from './cleanup';
 
 /**
- * 格式化 Markdown
+ * Format Markdown
  */
 export function formatMarkdown(markdown: string): string {
   return cleanupMarkdown(markdown);

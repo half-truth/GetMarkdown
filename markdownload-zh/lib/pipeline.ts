@@ -1,7 +1,7 @@
 /**
- * 主管线 orchestrator
+ * Main pipeline orchestrator
  *
- * 组合四个阶段：Preprocess → Extract → Convert → Format
+ * Composes four stages: Preprocess → Extract → Convert → Format
  */
 import type { PipelineResult } from './types';
 import { getSiteAdapter } from './sites';
@@ -12,12 +12,12 @@ import { formatMarkdown } from './format';
 import { detectDocFramework } from './sites/adapters/generic-docs';
 
 /**
- * 运行完整的提取管线
+ * Run the full extraction pipeline
  *
- * @param doc 工作文档（克隆后的，用于 DOM 变更）
- * @param url 页面 URL
- * @param sourceDoc 原始文档（可选，用于 Shadow DOM 读取）
- * @param onMark 可选打点回调（诊断用），各阶段结束时触发
+ * @param doc Working document (cloned, for DOM mutations)
+ * @param url Page URL
+ * @param sourceDoc Original document (optional, for Shadow DOM reading)
+ * @param onMark Optional mark callback (for diagnostics), triggered at each stage
  */
 export async function runPipeline(
   doc: Document,
@@ -28,11 +28,11 @@ export async function runPipeline(
   const mark = onMark || (() => {});
   try {
     mark('pl_start');
-    // 获取站点适配器（URL 匹配 + DOM 检测）
+    // Get site adapter (URL matching + DOM detection)
     let adapter = getSiteAdapter(url, doc);
     mark('pl_adapter');
 
-    // Stage 1: Preprocess（失败不中断）
+    // Stage 1: Preprocess (non-fatal on failure)
     try {
       await preprocessDOM(doc, url, adapter);
     } catch (e) {
@@ -40,12 +40,12 @@ export async function runPipeline(
     }
     mark('pl_preprocess');
 
-    // 如果 URL 没匹配到适配器，preprocess 后再用 DOM 检测一次
+    // If URL didn't match an adapter, re-detect using DOM after preprocessing
     if (!adapter) {
       const docAdapter = detectDocFramework(doc);
       if (docAdapter) {
         adapter = docAdapter;
-        // 补充执行文档框架的 removeSelectors
+        // Run the doc framework's removeSelectors as a supplement
         if (adapter.removeSelectors && adapter.removeSelectors.length > 0) {
           try {
             doc.querySelectorAll(adapter.removeSelectors.join(', ')).forEach((el) => el.remove());
@@ -56,14 +56,14 @@ export async function runPipeline(
       }
     }
 
-    // Stage 2: Extract（核心阶段，传入 sourceDoc 供 Shadow DOM 站点使用）
+    // Stage 2: Extract (core stage, pass sourceDoc for Shadow DOM sites)
     const extracted = await extractContent(doc, url, adapter, sourceDoc);
     mark('pl_extract');
     if (!extracted) {
       return { success: false, error: 'NO_CONTENT' };
     }
 
-    // Stage 3: Convert（传入 url 用于懒加载图片相对路径归一化）
+    // Stage 3: Convert (pass url for lazy-loaded image relative path normalization)
     const markdown = convertToMarkdown(extracted.html, url);
     mark('pl_convert');
 

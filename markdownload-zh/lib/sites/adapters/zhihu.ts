@@ -1,14 +1,14 @@
 /**
- * 知乎适配器
+ * Zhihu adapter
  *
- * ⚠️ 原样搬迁自 extractor.unlisted.ts，不改任何逻辑
+ * ⚠️ Ported as-is from extractor.unlisted.ts, logic unchanged
  */
 import type { SiteAdapter } from '../../types';
 
 export const zhihuAdapter: SiteAdapter = {
   id: 'zhihu',
   match: 'zhihu.com',
-  siteName: '知乎',
+  siteName: 'Zhihu',
 
   removeSelectors: [
     '.RecommendationColumn', '.HotAnswers', '.AdCard',
@@ -19,11 +19,11 @@ export const zhihuAdapter: SiteAdapter = {
   ],
 
   preprocess: (doc: Document) => {
-    // 将知乎数学公式元素转换为 TeX 标记，保留公式内容
+    // Convert Zhihu math formula elements to TeX markup, preserving formula content
     doc.querySelectorAll('.ztext-math').forEach((el) => {
       const tex = el.getAttribute('data-tex');
       if (!tex) return;
-      // 块级公式（独占一行的 span 或 p 内）vs 行内公式
+      // Block formula (span or p occupying its own line) vs inline formula
       const isBlock =
         (el.parentElement?.tagName === 'P' &&
           el.parentElement.children.length === 1);

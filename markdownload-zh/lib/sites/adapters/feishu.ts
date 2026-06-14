@@ -1,29 +1,29 @@
 /**
- * 飞书文档适配器
+ * Feishu Docs adapter
  *
- * 覆盖范围（基于知识库 429 链接实测）：
- *   docx (170) ✓  — 虚拟滚动 DOM，本适配器核心目标
- *   file (204) ✓  — 飞书 302 重定向到 docx，自动命中
- *   sheets (49) △ — 部分重定向到 docx（可提取），部分到 base（Canvas，不可提取）
- *   slides (5)  ✗ — 非标准 DOM，SPA 跳转，回退 Readability
- *   base (1)    ✗ — 纯 Canvas 渲染，回退 Readability
+ * Coverage (tested against knowledge base #429 links):
+ *   docx (170) ✓  — Virtual-scroll DOM, primary target of this adapter
+ *   file (204) ✓  — Feishu 302 redirects to docx, matched automatically
+ *   sheets (49) △ — Partially redirect to docx (extractable), partially to base (Canvas, not extractable)
+ *   slides (5)  ✗ — Non-standard DOM, SPA navigation, falls back to Readability
+ *   base (1)    ✗ — Pure Canvas rendering, falls back to Readability
  *
- * 虚拟滚动策略：
- *   - div[data-block-id] 块：视口外存在但 innerHTML 为空
- *   - 表格 <tr data-index>：同样只渲染可见行（每次 3-5 行）
- *   - scrollHeight 随滚动动态增长
- *   - 自适应终止：连续 N 步无新内容 = 到底
+ * Virtual scroll strategy:
+ *   - div[data-block-id] blocks: exist outside viewport but innerHTML is empty
+ *   - Table <tr data-index>: only visible rows rendered (3-5 rows per batch)
+ *   - scrollHeight grows dynamically during scroll
+ *   - Adaptive termination: N consecutive steps with no new content = reached bottom
  *
- * 图片策略：
- *   - 80% 为 blob: URL，20% 为 http（均需登录态）
- *   - 统一 Canvas 转 data:image/jpeg（100% 成功率实测）
- *   - 限宽 800px + JPEG 0.6 压缩（兼容 Typora/Obsidian/Claude）
+ * Image strategy:
+ *   - 80% are blob: URLs, 20% are http (all require login session)
+ *   - Unified Canvas conversion to data:image/jpeg (100% success rate in testing)
+ *   - Capped at 800px width + JPEG 0.6 quality (compatible with Typora/Obsidian/Claude)
  */
 import type { SiteAdapter } from '../../types';
 import { removeZeroWidthChars } from '@/utils/text-cleanup';
 
 // ---------------------------------------------------------------------------
-// 工具函数
+// Utility functions
 // ---------------------------------------------------------------------------
 
 export function cleanZeroWidth(text: string): string {
@@ -38,7 +38,7 @@ export function escapeHtml(text: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// 富文本提取：ace-line > span[data-string] → 干净 HTML
+// Rich text extraction: ace-line > span[data-string] → clean HTML
 // ---------------------------------------------------------------------------
 
 export function processAceLine(line: HTMLElement): string {
@@ -99,7 +99,7 @@ export function extractRichText(el: HTMLElement): string {
 }
 
 // ---------------------------------------------------------------------------
-// 图片转换：Canvas → data:image/jpeg（100% 成功率实测）
+// Image conversion: Canvas → data:image/jpeg (100% success rate in testing)
 // ---------------------------------------------------------------------------
 
 const IMG_MAX_WIDTH = 800;
@@ -125,7 +125,7 @@ function convertImage(el: HTMLElement): string | null {
     const dataUrl = canvas.toDataURL('image/jpeg', IMG_JPEG_QUALITY);
     return `<img src="${dataUrl}" alt="${alt}">`;
   } catch {
-    // Canvas 失败（CORS 等）→ 尝试原始 src
+    // Canvas failure (CORS etc.) → try original src
     const src = img.getAttribute('src') || '';
     if (src && !src.startsWith('blob:')) return `<img src="${src}" alt="${alt}">`;
     return null;
@@ -133,15 +133,15 @@ function convertImage(el: HTMLElement): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Block → 干净 HTML（实测覆盖的全部 block type）
+// Block → clean HTML (covers all block types verified in testing)
 // ---------------------------------------------------------------------------
 
-/** 跳过的 block type（非内容或由父级处理） */
+/** Skipped block types (non-content or handled by parent) */
 const SKIP_TYPES = new Set([
-  'page',            // 页面容器，标题单独提取
-  'back_ref_list',   // 反向链接
-  'table',           // 由表格行收集处理
-  // slides 专属（不在 docx 中出现，但防御性跳过）
+  'page',            // Page container, title extracted separately
+  'back_ref_list',   // Back references
+  'table',           // Handled by table row collection
+  // Slides-specific (not in docx, but defensive skip)
   'slide', 'shape', 'line', 'group', 'blank', 'presentation',
 ]);
 
@@ -150,9 +150,9 @@ export function convertBlock(el: HTMLElement): string | null {
 
   if (SKIP_TYPES.has(blockType)) return null;
 
-  // 标题：heading / heading1 / heading2 / heading3 ...
+  // Heading: heading / heading1 / heading2 / heading3 ...
   if (blockType.startsWith('heading')) {
-    // heading-hN class 精确匹配，否则从 blockType 后缀推断
+    // heading-hN class exact match, otherwise infer from blockType suffix
     const fromClass = [1, 2, 3, 4, 5, 6].find((l) =>
       el.classList.contains(`heading-h${l}`),
     );
@@ -161,10 +161,10 @@ export function convertBlock(el: HTMLElement): string | null {
     return `<h${level}>${extractRichText(el)}</h${level}>`;
   }
 
-  // 分割线
+  // Divider
   if (blockType === 'divider' || blockType === 'horizontal_rule') return '<hr>';
 
-  // 代码块
+  // Code block
   const codeInner = el.querySelector('.docx-code-block-inner-container');
   if (codeInner) {
     const lang =
@@ -173,31 +173,31 @@ export function convertBlock(el: HTMLElement): string | null {
     return `<pre><code${lang ? ` class="language-${lang}"` : ''}>${escapeHtml(code)}</code></pre>`;
   }
 
-  // 图片
+  // Image
   if (blockType === 'image') return convertImage(el);
 
-  // 列表
+  // List
   if (blockType === 'bullet') return `<ul><li>${extractRichText(el)}</li></ul>`;
   if (blockType === 'ordered') return `<ol><li>${extractRichText(el)}</li></ol>`;
 
-  // 待办
+  // Todo
   if (blockType === 'todo') {
     const checked = el.querySelector('[data-checked="true"]') ? 'x' : ' ';
     return `<ul><li>[${checked}] ${extractRichText(el)}</li></ul>`;
   }
 
-  // 引用 / 高亮块
+  // Blockquote / Callout
   if (blockType === 'quote' || blockType === 'callout') {
     return `<blockquote>${extractRichText(el)}</blockquote>`;
   }
 
-  // 默认：提取为段落
+  // Default: extract as paragraph
   const text = extractRichText(el);
   return text ? `<p>${text}</p>` : null;
 }
 
 // ---------------------------------------------------------------------------
-// 表格行收集（按 data-index 逐行合并，跨滚动位置去重）
+// Table row collection (merge by data-index across scroll positions)
 // ---------------------------------------------------------------------------
 
 export function collectTableRow(row: Element): string | null {
@@ -216,10 +216,10 @@ export function collectTableRow(row: Element): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// 页面类型检测
+// Page type detection
 // ---------------------------------------------------------------------------
 
-/** 检测当前页面是否为可提取的 docx 编辑器 */
+/** Detect if the current page is an extractable docx editor */
 export function isDocxPage(doc: Document): boolean {
   return !!(
     doc.querySelector('#docx > div') ||
@@ -228,21 +228,21 @@ export function isDocxPage(doc: Document): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// 自适应滚动 + 收集
+// Adaptive scroll + collection
 // ---------------------------------------------------------------------------
 
 async function scrollAndCollect(
   liveDoc: Document,
 ): Promise<{ title: string; contentHtml: string } | null> {
-  // 检测是否为 docx 页面（slides/base/sheets 不适用）
+  // Check if it is a docx page (slides/base/sheets are not applicable)
   if (!isDocxPage(liveDoc)) return null;
 
   const scrollContainer = (liveDoc.querySelector('#docx > div') ||
     liveDoc.querySelector('.bear-web-x-container > div')) as HTMLElement;
 
-  // 非表格 block 收集（blockId → { order, html }），order 保证文档顺序
+  // Non-table block collection (blockId → { order, html }), order preserves document sequence
   const collected = new Map<string, { order: number; html: string }>();
-  // 表格行收集（data-index → row html），按 table blockId 分组
+  // Table row collection (data-index → row html), grouped by table blockId
   const tableMeta = new Map<
     string,
     { order: number; rows: Map<string, string> }
@@ -250,19 +250,19 @@ async function scrollAndCollect(
   let blockOrder = 0;
   let title = '';
 
-  /** 当前收集总量 */
+  /** Current collection count */
   const contentSize = () => {
     let n = collected.size;
     for (const meta of tableMeta.values()) n += meta.rows.size;
     return n;
   };
 
-  /** 快照当前视口中已渲染的内容 */
+  /** Snapshot the currently rendered content in the viewport */
   const snapshot = () => {
-    // 防护：页面可能在滚动过程中跳转（知识库 SPA 导航）
+    // Guard: page may navigate during scroll (knowledge base SPA navigation)
     if (!isDocxPage(liveDoc)) return;
 
-    // ---- 表格行：逐行收集 ----
+    // ---- Table rows: collect row by row ----
     for (const row of liveDoc.querySelectorAll('table tr[data-index]')) {
       const rowIdx = row.getAttribute('data-index')!;
       const tableBlock = row.closest('div[data-block-type="table"]');
@@ -278,7 +278,7 @@ async function scrollAndCollect(
       if (rowHtml) meta.rows.set(rowIdx, rowHtml);
     }
 
-    // ---- 非表格 block（选择器层面排除表格子孙，避免逐节点 closest() 遍历）----
+    // ---- Non-table blocks (exclude table descendants at selector level, avoid per-node closest()) ----
     for (const el of liveDoc.querySelectorAll(
       'div[data-block-id]:not(div[data-block-type="table"] *)',
     )) {
@@ -288,7 +288,7 @@ async function scrollAndCollect(
 
       const blockType = el.getAttribute('data-block-type') || '';
 
-      // 表格占位（内容由行收集覆盖）
+      // Table placeholder (content covered by row collection)
       if (blockType === 'table') {
         if (!tableMeta.has(bid)) {
           tableMeta.set(bid, { order: blockOrder++, rows: new Map() });
@@ -296,7 +296,7 @@ async function scrollAndCollect(
         continue;
       }
 
-      // 页面标题
+      // Page title
       if (blockType === 'page') {
         if (!title) {
           const pageContent = el.querySelector('.page-block-content');
@@ -312,10 +312,10 @@ async function scrollAndCollect(
     }
   };
 
-  // 初始快照
+  // Initial snapshot
   snapshot();
 
-  // ---- 自适应滚动 ----
+  // ---- Adaptive scroll ----
   let totalH = scrollContainer.scrollHeight;
   const viewH = scrollContainer.clientHeight;
 
@@ -327,7 +327,7 @@ async function scrollAndCollect(
     let emptySteps = 0;
 
     for (let y = step; Date.now() < deadline; y += step) {
-      // 防护：页面跳转检测
+      // Guard: page navigation detection
       if (!isDocxPage(liveDoc)) break;
 
       scrollContainer.scrollTo(0, Math.min(y, totalH));
@@ -338,7 +338,7 @@ async function scrollAndCollect(
       const after = contentSize();
 
       if (after > before) {
-        // 发现新内容，额外等待确保渲染完成
+        // Found new content, wait extra to ensure rendering completes
         await new Promise((r) => setTimeout(r, 100));
         snapshot();
         emptySteps = 0;
@@ -346,11 +346,11 @@ async function scrollAndCollect(
         emptySteps++;
       }
 
-      // scrollHeight 随渲染动态增长
+      // scrollHeight grows dynamically as content renders
       const fresh = scrollContainer.scrollHeight;
       if (fresh > totalH) totalH = fresh;
 
-      // 到底判定：连续 N 步无新内容 且 已超过 scrollHeight
+      // End determination: N consecutive empty steps and past scrollHeight
       if (emptySteps >= EMPTY_STEPS_LIMIT && y >= totalH) break;
       if (y > totalH + step * 2) break;
     }
@@ -358,12 +358,12 @@ async function scrollAndCollect(
     scrollContainer.scrollTo(0, 0);
   }
 
-  // ---- 组装最终 HTML（按首次出现的 blockOrder 排序，保持文档顺序）----
+  // ---- Assemble final HTML (sorted by blockOrder, preserves document order) ----
   const entries: { order: number; html: string }[] = [];
 
   for (const meta of tableMeta.values()) {
     if (meta.rows.size === 0) continue;
-    // 表格行 data-index 是数字，按数字排序
+    // Table row data-index is numeric, sort numerically
     const sortedRows = [...meta.rows.entries()].sort(
       (a, b) => parseInt(a[0], 10) - parseInt(b[0], 10),
     );
@@ -381,8 +381,8 @@ async function scrollAndCollect(
 
   if (entries.length === 0) return null;
 
-  // convertBlock 对每个 bullet/ordered 独立包 <ul><li>...</li></ul>
-  // Turndown 默认不合并相邻同类列表，会在 Markdown 里插入空行断开列表
+  // convertBlock wraps each bullet/ordered independently in <ul><li>...</li></ul>
+  // Turndown does not merge adjacent same-type lists, inserting blank lines between them
   // 源头合并：相邻 </ul>\n<ul>、</ol>\n<ol> 抹掉即可，异类 (<ul>→<ol>) 不匹配不受影响
   const contentHtml = `<article>${entries.map((e) => e.html).join('\n')}</article>`
     .replace(/<\/ul>\n<ul>/g, '')
@@ -395,13 +395,13 @@ async function scrollAndCollect(
 }
 
 // ---------------------------------------------------------------------------
-// 导出适配器
+// Export adapter
 // ---------------------------------------------------------------------------
 
 export const feishuAdapter: SiteAdapter = {
   id: 'feishu',
   match: 'feishu.cn',
-  siteName: '飞书文档',
+  siteName: 'Feishu Docs',
   needsSourceDoc: true,
   removeSelectors: [
     '.sidebar',
@@ -414,7 +414,7 @@ export const feishuAdapter: SiteAdapter = {
   customExtract: async (_doc, _url, sourceDoc) => {
     if (!sourceDoc) return null;
     const result = await scrollAndCollect(sourceDoc);
-    // result 为 null 时回退 Readability（slides/base/sheets 等不可提取页面）
+    // Return null to fall back to Readability for non-extractable pages (slides/base/sheets)
     if (!result) return null;
     return { title: result.title, content: result.contentHtml };
   },

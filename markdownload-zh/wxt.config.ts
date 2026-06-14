@@ -2,16 +2,17 @@ import { defineConfig } from 'wxt';
 import { resolve } from 'path';
 
 export default defineConfig({
+  outDir: resolve(__dirname, '../output'),
   alias: {
     '@': resolve(__dirname, './'),
   },
   manifest: {
-    name: 'MarkDownload 中文版',
-    description: '将网页内容剪藏为 Markdown 文件，专为 Obsidian 用户优化',
+    name: 'GetMarkdown',
+    description: 'Save web pages as clean Markdown',
     version: '0.1.0',
     permissions: ['activeTab', 'scripting', 'downloads'],
     action: {
-      default_title: 'MarkDownload',
+      default_title: 'GetMarkdown',
       default_popup: 'popup.html',
       default_icon: {
         16: 'icon/icon-16.png',

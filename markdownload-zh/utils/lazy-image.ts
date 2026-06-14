@@ -1,9 +1,9 @@
 /**
- * 懒加载图片处理工具
+ * Lazy image loading utility
  */
 
 /**
- * 懒加载图片属性列表（按优先级排序）
+ * Lazy-loaded image attribute names (ordered by priority)
  */
 export const LAZY_IMAGE_ATTRS = [
   'data-src',
@@ -22,7 +22,7 @@ export const LAZY_IMAGE_ATTRS = [
 ] as const;
 
 /**
- * 归一化图片 URL（支持相对路径、协议相对路径）
+ * Normalize image URL (supports relative paths, protocol-relative URLs)
  */
 export function normalizeImageUrl(value: string, baseUrl: string): string | null {
   if (!value || value.trim() === '') return null;
@@ -38,7 +38,7 @@ export function normalizeImageUrl(value: string, baseUrl: string): string | null
 }
 
 /**
- * 从 srcset 属性提取第一个 URL
+ * Extract first URL from srcset attribute
  */
 export function extractFirstFromSrcset(srcset: string | null): string | null {
   if (!srcset) return null;
@@ -46,7 +46,7 @@ export function extractFirstFromSrcset(srcset: string | null): string | null {
 }
 
 /**
- * 判断 src 是否为占位图（需要被替换）
+ * Check if src is a placeholder image (needs to be replaced)
  */
 export function isPlaceholderSrc(src: string | null): boolean {
   if (!src) return true;

@@ -1,11 +1,11 @@
 /**
- * 内容提取 Content Script
+ * Content Extraction Script
  *
- * 此脚本通过 chrome.scripting.executeScript 程序化注入。
- * 所有业务逻辑已迁移到 lib/ 模块，此文件仅作为入口。
+ * Programmatically injected via chrome.scripting.executeScript.
+ * All business logic has been migrated to lib/ modules; this file is just the entry point.
  *
- * 结果通过 window.__markdownload_extracted 传递，
- * 包含 requestId 用于防止读取过期结果。
+ * Results are passed through window.__markdownload_extracted,
+ * including requestId to prevent reading stale results.
  */
 import { runPipeline } from '@/lib/pipeline';
 
@@ -17,7 +17,7 @@ export default defineUnlistedScript(async () => {
 
   mark('ex_start');
 
-  // 读取 Popup 设置的 requestId（用于防竞态）
+  // Read requestId set by Popup (used for race-condition prevention)
   const requestId = window.__markdownload_requestId || '';
 
   const cloned = document.cloneNode(true) as Document;
@@ -26,7 +26,7 @@ export default defineUnlistedScript(async () => {
   const result = await runPipeline(
     cloned,
     window.location.href,
-    document, // 原始文档，供 Shadow DOM 站点读取 shadowRoot
+    document, // Original document, used to read shadowRoot on Shadow DOM sites
     mark
   );
   mark('ex_pipeline_done');
@@ -36,15 +36,15 @@ export default defineUnlistedScript(async () => {
     success: result.success,
     data: result.data,
     error: result.error
-      ? { code: result.error as 'NO_CONTENT' | 'EXTRACTION_FAILED', message: result.error === 'NO_CONTENT' ? '无法提取文章内容，页面可能不包含可读文章' : '提取失败' }
+      ? { code: result.error as 'NO_CONTENT' | 'EXTRACTION_FAILED', message: result.error === 'NO_CONTENT' ? 'Could not extract article content — page may not contain a readable article' : 'Extraction failed' }
       : undefined,
     _perf: marks,
   };
 
-  // 通知 Popup 提取完成（事件驱动，比轮询更快）
+  // Notify Popup that extraction is complete (event-driven, faster than polling)
   try {
     chrome.runtime.sendMessage({ type: '__markdownload_done', requestId });
   } catch {
-    // chrome.runtime 在某些注入上下文中不可用，回退到轮询
+    // chrome.runtime may not be available in some injection contexts; fall back to polling
   }
 });
